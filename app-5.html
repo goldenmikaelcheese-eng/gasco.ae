@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gasone — Freesia Gas Billing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ── PRINT STYLES ── */
+@media print {
+  body > *:not(#print-area) { display: none !important; }
+  #print-area { display: block !important; }
+  #print-area .rec-paper { max-width: 100%; box-shadow: none; border-radius: 0; }
+  .rec-actions, .nav-bar, .hdr { display: none !important; }
+}
+#print-area { display: none; }
+
+:root{
+  --bg:#0a0a0a;--s1:#141414;--s2:#1e1e1e;--s3:#282828;
+  --b1:#2a2a2a;--b2:#3a3a3a;
+  --t1:#f0ede8;--t2:#8a8782;--t3:#5a5754;
+  --green:#2d7a52;--green2:#4caf7d;
+  --gd:rgba(45,122,82,0.15);--gd2:rgba(45,122,82,0.06);
+  --red:#e05c5c;--gold:#c8a96e;--blue:#5c9be0;
+  --r:14px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100dvh;overflow-x:hidden;font-size:15px;line-height:1.5;}
+.screen{display:none;min-height:100dvh;flex-direction:column;}
+.screen.active{display:flex;}
+.hdr{padding:18px 20px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--b1);background:var(--bg);position:sticky;top:0;z-index:10;}
+.back{width:36px;height:36px;background:var(--s2);border:1px solid var(--b2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--t2);transition:all .15s;flex-shrink:0;}
+.back:active{background:var(--s3);transform:scale(.93);}
+.htitle{font-size:16px;font-weight:500;}
+.hsub{font-size:12px;color:var(--t3);margin-top:1px;}
+.logo{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo svg{width:16px;height:16px;}
+.content{flex:1;overflow-y:auto;}
+.sec{padding:20px 20px 8px;}
+.sec-lbl{font-size:11px;font-weight:500;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
+.srch{padding:14px 20px;position:relative;background:var(--bg);border-bottom:1px solid var(--b1);}
+.srch-input{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:12px;padding:12px 16px 12px 42px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
+.srch-input::placeholder{color:var(--t3);}
+.srch-input:focus{border-color:var(--green);}
+.srch-icon{position:absolute;left:35px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;pointer-events:none;}
+#screen-loading{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:20px;}
+.spinner{width:40px;height:40px;border:3px solid var(--b2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#screen-login{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 24px;}
+.login-logo{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:48px;}
+.login-mark{width:72px;height:72px;background:var(--green);border-radius:18px;display:flex;align-items:center;justify-content:center;}
+.login-mark svg{width:36px;height:36px;}
+.login-brand{font-size:28px;font-weight:600;}
+.login-sub{font-size:13px;color:var(--t3);text-align:center;line-height:1.5;}
+.login-form{width:100%;max-width:340px;display:flex;flex-direction:column;gap:14px;}
+.lf{display:flex;flex-direction:column;gap:6px;}
+.ll{font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;font-weight:500;}
+.li{background:var(--s1);border:1.5px solid var(--b2);border-radius:12px;padding:14px 16px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;transition:border-color .2s;width:100%;}
+.li:focus{border-color:var(--green);}
+.login-btn{height:54px;background:var(--green);color:white;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.login-btn:active{transform:scale(.97);}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;}
+.login-footer{font-size:11px;color:var(--t3);text-align:center;margin-top:28px;line-height:1.7;}
+.list-item{display:flex;align-items:center;padding:14px 20px;gap:14px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .15s;}
+.list-item:active{background:var(--s2);}
+.list-icon{width:42px;height:42px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.lb{flex:1;min-width:0;}
+.lt{font-size:14px;font-weight:500;}
+.ls{font-size:12px;color:var(--t3);margin-top:2px;}
+.chev{color:var(--t3);font-size:18px;}
+.unit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 20px 20px;}
+.unit-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rs);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s;}
+.unit-card:active{transform:scale(.94);border-color:var(--green);}
+.unit-card.done-card{border-color:rgba(76,175,125,0.3);background:rgba(45,122,82,0.06);}
+.un{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;}
+.us{font-size:10px;color:var(--t3);margin-top:4px;}
+.us.done{color:var(--green2);}
+.udot{width:6px;height:6px;border-radius:50%;background:var(--green2);display:inline-block;margin-right:3px;}
+.mform{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.icard{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px;}
+.irow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--b1);}
+.irow:last-child{border-bottom:none;padding-bottom:0;}
+.ilbl{font-size:12px;color:var(--t3);}
+.ival{font-size:13px;font-weight:500;font-family:'DM Mono',monospace;}
+.ival.green{color:var(--green2);}
+.ival.gold{color:var(--gold);}
+.prev-card{background:var(--gd2);border:1px solid rgba(45,122,82,.2);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:14px;}
+.prev-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--green2);margin-top:2px;}
+.fg{display:flex;flex-direction:column;gap:6px;}
+.flbl{font-size:12px;color:var(--t3);letter-spacing:.05em;text-transform:uppercase;font-weight:500;}
+.biw{position:relative;background:var(--s1);border:1.5px solid var(--b2);border-radius:var(--r);transition:border-color .2s;}
+.biw:focus-within{border-color:var(--green);}
+.bi{width:100%;background:transparent;border:none;padding:16px 60px 16px 18px;color:var(--t1);font-family:'DM Mono',monospace;font-size:26px;font-weight:500;outline:none;}
+.bi::placeholder{color:var(--t3);font-size:22px;}
+.biu{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--t3);}
+.stdinput{width:100%;background:var(--s1);border:1.5px solid var(--b2);border-radius:var(--r);padding:14px 18px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.stdinput:focus{border-color:var(--green);}
+.stdinput::-webkit-calendar-picker-indicator{filter:invert(.5);}
+
+/* CASH / CARD ONLY */
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.pbtn{background:var(--s1);border:2px solid var(--b2);border-radius:12px;padding:18px 10px;text-align:center;cursor:pointer;transition:all .15s;font-size:15px;color:var(--t2);font-weight:500;}
+.pbtn:active{transform:scale(.96);}
+.pbtn.sel{border-color:var(--green);background:var(--gd);color:var(--green2);}
+.pbtn-icon{font-size:28px;margin-bottom:8px;}
+
+.np-overlay{display:none;position:fixed;inset:0;z-index:100;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,.6);}
+.np-overlay.open{display:flex;}
+.np-sheet{background:var(--s1);border-radius:20px 20px 0 0;padding:20px 20px 32px;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.np-display{background:var(--bg);border-radius:12px;padding:14px 20px;margin-bottom:14px;display:flex;align-items:baseline;gap:8px;min-height:60px;}
+.np-val{font-family:'DM Mono',monospace;font-size:32px;font-weight:500;flex:1;}
+.np-unit{font-size:13px;color:var(--t3);}
+.np-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.nb{background:var(--s2);border:2px solid var(--b2);border-radius:14px;height:76px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:28px;font-weight:500;cursor:pointer;user-select:none;touch-action:manipulation;-webkit-user-select:none;transition:background .08s,border-color .08s;}
+.nb:active{background:var(--green);border-color:var(--green);color:white;}
+.nb.act{background:var(--s3);color:var(--t1);font-size:24px;border-color:var(--b2);}
+.nb.act:active{background:var(--green);border-color:var(--green);color:white;}
+.nb.confirm{background:var(--green);color:white;font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;grid-column:span 3;height:68px;border:none;border-radius:14px;margin-top:6px;touch-action:manipulation;letter-spacing:0.02em;}
+
+.res-banner{background:var(--s1);border-bottom:1px solid var(--b1);padding:20px;}
+.res-big{font-family:'DM Mono',monospace;font-size:48px;font-weight:500;color:var(--green2);letter-spacing:-.01em;line-height:1;}
+.res-sub{font-size:12px;color:var(--t3);margin-top:6px;}
+.calc-card{margin:12px 20px 0;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;}
+.crow{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--b1);}
+.crow:last-child{border-bottom:none;}
+.crow.sh{background:var(--s2);}
+.clbl{font-size:13px;color:var(--t2);}
+.clbl.sec{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);}
+.cval{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
+.cval.green{color:var(--green2);}
+.cval.gold{color:var(--gold);}
+.cval.total{color:var(--green2);font-size:15px;}
+
+/* RECEIPT */
+.rec-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.9);overflow-y:auto;padding:20px;}
+.rec-overlay.open{display:block;}
+.rec-paper{background:white;color:#1a1a1a;max-width:380px;margin:0 auto;border-radius:4px;font-family:'DM Sans',sans-serif;overflow:hidden;}
+.rh{padding:18px 20px 12px;border-bottom:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:flex-start;}
+.rb{font-size:18px;font-weight:700;color:#1a1a1a;letter-spacing:.06em;}
+.rb-sub{font-size:9px;color:#888;letter-spacing:.08em;text-transform:uppercase;}
+.ra{font-size:13px;font-weight:700;letter-spacing:.08em;text-align:right;}
+.ra-sub{font-size:9px;color:#888;text-align:right;}
+.rt{text-align:center;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:7px 20px;border-bottom:1px solid #ddd;background:#f5f5f5;}
+.rm{padding:8px 20px;display:flex;justify-content:space-between;border-bottom:1px solid #ddd;font-size:12px;}
+.rtable{width:100%;border-collapse:collapse;font-size:12px;}
+.rtable td{padding:7px 12px;border:1px solid #ddd;}
+.rtable td.rl{color:#555;width:48%;font-size:11px;}
+.rtable td.rv{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+.rtable td.ra2{text-align:right;font-family:'DM Mono',monospace;font-weight:600;}
+.rtable tr.rsec td{background:#f0f0f0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#555;padding:5px 12px;}
+.rtable tr.rtotal td{background:#1a1a1a;color:white;font-weight:600;}
+.rtable tr.rvat td{background:#fafafa;}
+.rpay{padding:8px 20px;display:grid;grid-template-columns:1fr 1fr;gap:5px;border-top:1px solid #ddd;border-bottom:1px solid #ddd;}
+.rpo{border:1px solid #ddd;border-radius:4px;padding:7px 4px;text-align:center;font-size:11px;color:#aaa;}
+.rpo.act{border-color:#1a1a1a;background:#1a1a1a;color:white;font-weight:600;}
+.rsigs{display:grid;grid-template-columns:1fr 1fr;}
+.rsig{padding:14px 12px;border-right:1px solid #ddd;}
+.rsig:last-child{border-right:none;}
+.rsig-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:24px;}
+.rsig-line{border-bottom:1px solid #999;}
+.rsig-name{font-size:11px;color:#333;margin-top:3px;font-weight:500;}
+.rfooter{padding:8px 20px 14px;text-align:center;font-size:9px;color:#999;line-height:1.7;border-top:1px solid #eee;}
+.rec-actions{display:flex;gap:8px;max-width:380px;margin:12px auto 0;padding-bottom:20px;flex-wrap:wrap;}
+.rbtn{flex:1;min-width:120px;height:50px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+.rbtn-save{background:var(--green);color:white;}
+.rbtn-print{background:var(--blue);color:white;}
+.rbtn-close{background:rgba(255,255,255,.1);color:white;}
+
+.bot-actions{padding:16px 20px;display:flex;gap:10px;border-top:1px solid var(--b1);background:var(--bg);position:sticky;bottom:0;}
+.btn{flex:1;height:52px;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn:active{transform:scale(.97);}
+.btn-p{background:var(--green);color:white;}
+.btn-s{background:var(--s2);color:var(--t2);border:1px solid var(--b2);}
+.sub-wrap{padding:16px 20px 24px;}
+.sub-btn{width:100%;height:56px;background:var(--green);color:white;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;}
+.sub-btn:active{transform:scale(.97);opacity:.9;}
+.sub-btn:disabled{opacity:.35;cursor:not-allowed;}
+.nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--b1);display:flex;z-index:20;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 12px;cursor:pointer;color:var(--t3);font-size:10px;gap:4px;letter-spacing:.04em;}
+.nav-item.active{color:var(--green2);}
+.nav-icon{font-size:22px;line-height:1;}
+.nav-pad{height:72px;}
+.home-hero{padding:28px 20px 20px;border-bottom:1px solid var(--b1);}
+.w-chip{display:inline-flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--b2);border-radius:20px;padding:6px 14px 6px 8px;margin-bottom:16px;}
+.w-av{width:24px;height:24px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:white;}
+.w-nm{font-size:12px;color:var(--t2);}
+.home-title{font-size:24px;font-weight:600;line-height:1.2;}
+.home-title span{color:var(--green2);}
+.home-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px;}
+.stat-box{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 8px;text-align:center;}
+.stat-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--green2);}
+.stat-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}
+.new-btn{margin:20px;width:calc(100% - 40px);height:58px;background:var(--green);color:white;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .15s;}
+.new-btn:active{transform:scale(.97);opacity:.9;}
+.hist-item{display:flex;align-items:center;padding:14px 20px;gap:14px;border-bottom:1px solid var(--b1);transition:background .15s;}
+.hist-badge{width:42px;height:42px;border-radius:10px;background:var(--gd);border:1px solid rgba(45,122,82,.2);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--green2);flex-shrink:0;}
+.hist-amt{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--green2);}
+
+/* ROUND SUMMARY */
+.round-card{margin:16px 20px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;}
+.round-row{display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--b1);}
+.round-row:last-child{border-bottom:none;}
+.round-lbl{font-size:13px;color:var(--t2);}
+.round-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--green2);}
+
+/* MANAGER */
+.mgr-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:16px;}
+.mgr-edit{padding:14px 16px;border-bottom:1px solid var(--b1);}
+.mgr-edit:last-child{border-bottom:none;}
+.mgr-flbl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.mgr-input{width:100%;background:var(--s2);border:1.5px solid var(--b2);border-radius:10px;padding:12px 14px;color:var(--t1);font-family:'DM Mono',monospace;font-size:18px;outline:none;transition:border-color .2s;}
+.mgr-input:focus{border-color:var(--green);}
+.mgr-save{margin:0 16px 16px;width:calc(100% - 32px);height:48px;background:var(--green);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px;}
+.stat-mini{background:var(--s2);border-radius:10px;padding:14px;text-align:center;}
+.stat-mini-num{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;color:var(--green2);}
+.stat-mini-lbl{font-size:11px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* MANAGER READING CARD */
+.mgr-reading-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);margin:0 20px 12px;overflow:hidden;}
+.mgr-reading-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--b1);}
+.mgr-reading-title{font-size:14px;font-weight:500;color:var(--t1);}
+.mgr-reading-sub{font-size:12px;color:var(--t3);margin-top:2px;}
+.mgr-reading-amount{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--green2);}
+.mgr-reading-actions{padding:12px 16px;display:flex;gap:8px;}
+.mgr-action-btn{flex:1;height:38px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.mgr-action-btn:active{transform:scale(.97);}
+.btn-wa{background:#25D366;color:white;}
+.btn-view{background:var(--s2);color:var(--t2);border:1px solid var(--b2);}
+.btn-flag{background:var(--red-dim,rgba(224,92,92,0.12));color:var(--red);border:1px solid rgba(224,92,92,0.2);}
+
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green2);display:inline-block;margin-left:6px;}
+.sync-dot.off{background:var(--red);}
+.sync-dot.sync{background:var(--gold);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.toast{position:fixed;bottom:90px;left:20px;right:20px;background:var(--green2);color:#0a0a0a;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:500;z-index:300;display:flex;align-items:center;gap:10px;transform:translateY(20px);opacity:0;transition:all .25s;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.err{background:var(--red);color:white;}
+.empty{padding:60px 30px;text-align:center;color:var(--t3);}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-title{font-size:15px;color:var(--t2);margin-bottom:6px;}
+.empty-sub{font-size:13px;}
+.t-muted{color:var(--t3);}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+.tag-cash{background:rgba(200,169,110,0.15);color:var(--gold);}
+.tag-card{background:rgba(92,155,224,0.15);color:var(--blue);}
+</style>
+</head>
+<body>
+
+<!-- PRINT AREA — hidden unless printing -->
+<div id="print-area">
+  <div class="rec-paper" id="print-receipt-clone"></div>
+</div>
+
+<!-- LOADING -->
+<div id="screen-loading" style="display:flex;min-height:100dvh;flex-direction:column;justify-content:center;align-items:center;gap:20px;">
+  <div class="spinner"></div>
+  <div style="font-size:14px;color:var(--t3)">Connecting to Gasone...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="screen-login" style="display:none;min-height:100dvh;flex-direction:column;justify-content:center;align-items:center;padding:40px 24px;">
+  <div class="login-logo">
+    <div class="login-mark"><svg viewBox="0 0 32 32" fill="none"><path d="M16 4C16 4 10 11 10 17C10 21 12.5 24 16 24C19.5 24 22 21 22 17C22 11 16 4 16 4Z" fill="white" opacity="0.9"/><path d="M16 14C16 14 13 17 13 19C13 21 14.5 22 16 22C17.5 22 19 21 19 19C19 17 16 14 16 14Z" fill="white"/></svg></div>
+    <div style="text-align:center"><div class="login-brand">Gasone</div><div class="login-sub">Freesia Electromechanical<br>Azizi Developments · Dubai</div></div>
+  </div>
+  <div class="login-form">
+    <div class="lf"><div class="ll">Name</div><input class="li" type="text" id="login-name" placeholder="Enter your name" autocomplete="off"></div>
+    <div class="lf"><div class="ll">Employee ID</div><input class="li" type="text" id="login-id" placeholder="Enter your ID" autocomplete="off" inputmode="numeric"></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In →</button>
+  </div>
+  <div class="login-footer">Freesia Electromechanical · Riviera 33, B-Floor<br>Meydan, Dubai – UAE<br>support.lpg@freesia.ae · +971 800 832 4847</div>
+</div>
+
+<!-- EMPLOYEE HOME -->
+<div class="screen" id="screen-home">
+  <div class="hdr">
+    <div class="logo"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2C8 2 5 5.5 5 8.5C5 10.5 6.5 12 8 12C9.5 12 11 10.5 11 8.5C11 5.5 8 2 8 2Z" fill="white" opacity="0.9"/><path d="M8 7C8 7 6.5 8.5 6.5 9.5C6.5 10.5 7.2 11 8 11C8.8 11 9.5 10.5 9.5 9.5C9.5 8.5 8 7 8 7Z" fill="white"/></svg></div>
+    <div style="flex:1"><div class="htitle">Gasone <span class="sync-dot" id="sync-dot"></span></div><div class="hsub" id="home-date">—</div></div>
+    <div onclick="logout()" style="font-size:12px;color:var(--t3);cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid var(--b2)">Sign out</div>
+  </div>
+  <div class="content">
+    <div class="home-hero">
+      <div class="w-chip"><div class="w-av" id="home-av">?</div><div class="w-nm" id="home-wn">—</div></div>
+      <div class="home-title">Gas Meter<br><span>Reading System</span></div>
+      <div class="home-stats">
+        <div class="stat-box"><div class="stat-num" id="st-today">0</div><div class="stat-lbl">Today</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-month">0</div><div class="stat-lbl">Month</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-total">0</div><div class="stat-lbl">All Time</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-aed">0</div><div class="stat-lbl">AED Today</div></div>
+      </div>
+    </div>
+    <button class="new-btn" onclick="go('screen-buildings')">⚡ New Reading</button>
+
+    <!-- ROUND SUMMARY -->
+    <div class="sec"><div class="sec-lbl">Today's Round</div></div>
+    <div class="round-card" id="round-card">
+      <div class="round-row"><span class="round-lbl">Units read today</span><span class="round-val" id="round-units">0</span></div>
+      <div class="round-row"><span class="round-lbl">Cash collected</span><span class="round-val" id="round-cash">AED 0.00</span></div>
+      <div class="round-row"><span class="round-lbl">Card collected</span><span class="round-val" id="round-card-amt">AED 0.00</span></div>
+      <div class="round-row"><span class="round-lbl">Total collected</span><span class="round-val" id="round-total">AED 0.00</span></div>
+    </div>
+
+    <div class="sec"><div class="sec-lbl">Recent Readings</div></div>
+    <div id="recent-list"><div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No readings yet</div><div class="empty-sub">Tap "New Reading" to start</div></div></div>
+    <div class="nav-pad"></div>
+  </div>
+  <div class="nav-bar">
+    <div class="nav-item active" onclick="go('screen-home')"><div class="nav-icon">🏠</div><span>HOME</span></div>
+    <div class="nav-item" onclick="go('screen-buildings')"><div class="nav-icon">🏢</div><span>BUILDINGS</span></div>
+  </div>
+</div>
+
+<!-- BUILDINGS -->
+<div class="screen" id="screen-buildings">
+  <div class="hdr">
+    <div class="back" onclick="goBack()">←</div>
+    <div><div class="htitle">Azizi Buildings</div><div class="hsub">Step 1 of 3</div></div>
+  </div>
+  <div class="srch"><span class="srch-icon">🔍</span><input class="srch-input" type="text" placeholder="Search buildings..." id="bldg-search" oninput="filterBldgs(this.value)"></div>
+  <div class="content" id="bldgs-list"></div>
+</div>
+
+<!-- UNITS -->
+<div class="screen" id="screen-units">
+  <div class="hdr">
+    <div class="back" onclick="goBack()">←</div>
+    <div><div class="htitle" id="units-bldg-name">Units</div><div class="hsub">Step 2 of 3</div></div>
+  </div>
+  <div class="srch"><span class="srch-icon">🔍</span><input class="srch-input" type="text" placeholder="Search unit number..." id="unit-search" oninput="filterUnits(this.value)"></div>
+  <div class="content">
+    <div class="sec"><div class="sec-lbl" id="units-count">All Units</div></div>
+    <div class="unit-grid" id="units-grid"></div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- METER ENTRY -->
+<div class="screen" id="screen-meter">
+  <div class="hdr">
+    <div class="back" onclick="goBack()">←</div>
+    <div><div class="htitle">Enter Reading</div><div class="hsub">Step 3 of 3</div></div>
+  </div>
+  <div class="content">
+    <div class="mform">
+      <div class="icard">
+        <div class="irow"><span class="ilbl">Building</span><span class="ival" id="m-bldg">—</span></div>
+        <div class="irow"><span class="ilbl">Unit</span><span class="ival green" id="m-unit">—</span></div>
+        <div class="irow"><span class="ilbl">Receipt S No.</span><span class="ival gold" id="m-sno">—</span></div>
+      </div>
+      <div class="prev-card">
+        <div style="font-size:28px">📅</div>
+        <div>
+          <div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em">Initial Meter Reading</div>
+          <div class="prev-val" id="prev-val">—</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px" id="prev-date">No previous record</div>
+        </div>
+      </div>
+      <div class="fg">
+        <div class="flbl">Current Meter Reading</div>
+        <div class="biw" onclick="openNp()"><input class="bi" type="text" id="meter-input" placeholder="0.000" readonly><span class="biu">m³</span></div>
+      </div>
+      <div class="fg"><div class="flbl">Current Date</div><input class="stdinput" type="date" id="reading-date"></div>
+      <div class="fg">
+        <div class="flbl">Payment Method</div>
+        <div class="pay-methods">
+          <div class="pbtn" id="pay-cash" onclick="selPay('Cash')"><div class="pbtn-icon">💵</div>Cash</div>
+          <div class="pbtn" id="pay-card" onclick="selPay('Card')"><div class="pbtn-icon">💳</div>Card</div>
+        </div>
+      </div>
+      <div class="fg"><div class="flbl">Comments (Optional)</div><input class="stdinput" type="text" id="notes-input" placeholder="e.g. meter replaced, tenant absent, meter issue..."></div>
+    </div>
+    <div class="sub-wrap"><button class="sub-btn" id="sub-btn" onclick="calcBill()" disabled>Calculate Bill →</button></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="hdr">
+    <div class="back" onclick="goBack()">←</div>
+    <div><div class="htitle">Bill Summary</div><div class="hsub" id="res-sub">—</div></div>
+  </div>
+  <div class="content">
+    <div class="res-banner">
+      <div style="font-size:13px;color:var(--t3)">Total Amount Including VAT</div>
+      <div class="res-big" id="res-amount">AED 0.00</div>
+      <div class="res-sub" id="res-sno">S No. —</div>
+    </div>
+    <div class="calc-card">
+      <div class="crow sh"><span class="clbl sec">Meter Reading</span></div>
+      <div class="crow"><span class="clbl">Initial reading</span><span class="cval" id="bd-prev">—</span></div>
+      <div class="crow"><span class="clbl">Current reading</span><span class="cval" id="bd-curr">—</span></div>
+      <div class="crow"><span class="clbl">Total units used (M3)</span><span class="cval green" id="bd-used">—</span></div>
+      <div class="crow"><span class="clbl">Unit charge</span><span class="cval" id="bd-grate">—</span></div>
+      <div class="crow"><span class="clbl">Gas amount</span><span class="cval" id="bd-gtotal">—</span></div>
+      <div class="crow sh"><span class="clbl sec">Service Charge</span></div>
+      <div class="crow"><span class="clbl">Days since last reading</span><span class="cval gold" id="bd-days">—</span></div>
+      <div class="crow"><span class="clbl">Rate (AED 25 / 30 days)</span><span class="cval">AED 0.8333 / day</span></div>
+      <div class="crow"><span class="clbl">Service charge</span><span class="cval gold" id="bd-svc">—</span></div>
+      <div class="crow sh"><span class="clbl sec">Totals</span></div>
+      <div class="crow"><span class="clbl">Subtotal (without VAT)</span><span class="cval" id="bd-sub">—</span></div>
+      <div class="crow"><span class="clbl">VAT 5%</span><span class="cval" id="bd-vat">—</span></div>
+      <div class="crow"><span class="clbl" style="font-weight:600;color:var(--t1)">Total payable (inc. VAT)</span><span class="cval total" id="bd-total">—</span></div>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+  <div class="bot-actions">
+    <button class="btn btn-s" onclick="discardReading()">✕ Discard</button>
+    <button class="btn btn-p" onclick="showReceipt()">🧾 View & Print</button>
+  </div>
+</div>
+
+<!-- MANAGER DASHBOARD -->
+<div class="screen" id="screen-manager">
+  <div class="hdr">
+    <div class="logo"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2C8 2 5 5.5 5 8.5C5 10.5 6.5 12 8 12C9.5 12 11 10.5 11 8.5C11 5.5 8 2 8 2Z" fill="white" opacity="0.9"/><path d="M8 7C8 7 6.5 8.5 6.5 9.5C6.5 10.5 7.2 11 8 11C8.8 11 9.5 10.5 9.5 9.5C9.5 8.5 8 7 8 7Z" fill="white"/></svg></div>
+    <div style="flex:1"><div class="htitle">Manager Dashboard <span class="sync-dot" id="mgr-sync"></span></div><div class="hsub" id="mgr-date">—</div></div>
+    <div onclick="logout()" style="font-size:12px;color:var(--t3);cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid var(--b2)">Sign out</div>
+  </div>
+  <div class="content">
+    <!-- LIVE STATS -->
+    <div class="sec"><div class="sec-lbl">Live Overview</div></div>
+    <div style="padding:0 20px">
+      <div class="mgr-card">
+        <div class="stat-grid">
+          <div class="stat-mini"><div class="stat-mini-num" id="mgr-today">0</div><div class="stat-mini-lbl">Today</div></div>
+          <div class="stat-mini"><div class="stat-mini-num" id="mgr-month">0</div><div class="stat-mini-lbl">This Month</div></div>
+          <div class="stat-mini"><div class="stat-mini-num" id="mgr-total">0</div><div class="stat-mini-lbl">All Time</div></div>
+          <div class="stat-mini"><div class="stat-mini-num" id="mgr-rev">0</div><div class="stat-mini-lbl">AED Month</div></div>
+        </div>
+        <!-- CASH VS CARD TODAY -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px 14px;">
+          <div style="background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.2);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold)" id="mgr-cash">AED 0</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em">💵 Cash Today</div>
+          </div>
+          <div style="background:rgba(92,155,224,0.1);border:1px solid rgba(92,155,224,0.2);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--blue)" id="mgr-card-amt">AED 0</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em">💳 Card Today</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="srch" style="position:static;border-top:1px solid var(--b1);">
+      <span class="srch-icon">🔍</span>
+      <input class="srch-input" type="text" placeholder="Search building, unit, employee..." id="mgr-filter" oninput="loadMgrReadings(this.value)">
+    </div>
+
+    <!-- READINGS WITH ACTIONS -->
+    <div class="sec"><div class="sec-lbl">All Readings <span id="mgr-count" style="color:var(--t3);font-weight:400"></span></div></div>
+    <div id="mgr-readings-list"><div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No readings yet</div></div></div>
+
+    <!-- RATES -->
+    <div class="sec" style="margin-top:8px"><div class="sec-lbl">Rate Configuration</div></div>
+    <div style="padding:0 20px">
+      <div class="mgr-card">
+        <div class="mgr-edit"><div class="mgr-flbl">Gas Rate (AED per m³)</div><div style="position:relative"><input class="mgr-input" type="number" id="mgr-gas" step="0.01"><span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--t3)">AED/m³</span></div></div>
+        <div class="mgr-edit"><div class="mgr-flbl">Service Charge (AED per 30 days)</div><div style="position:relative"><input class="mgr-input" type="number" id="mgr-svc" step="0.01"><span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--t3)">AED/30d</span></div></div>
+        <div class="mgr-edit" style="border-bottom:none"><div class="mgr-flbl">VAT Rate (%)</div><div style="position:relative"><input class="mgr-input" type="number" id="mgr-vat" step="0.1"><span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--t3)">%</span></div></div>
+        <button class="mgr-save" onclick="saveMgrRates()">Save Rates to Cloud</button>
+      </div>
+    </div>
+
+    <!-- DATA -->
+    <div class="sec"><div class="sec-lbl">Data Export</div></div>
+    <div style="padding:0 20px">
+      <div class="mgr-card">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+          <button onclick="exportCSV()" style="width:100%;height:44px;background:var(--s2);color:var(--t1);border:1px solid var(--b2);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">📤 Export All Readings (CSV)</button>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px 20px 4px;font-size:11px;color:var(--t3);text-align:center">Gasone v2.0 · Freesia Electromechanical · gasone.ae</div>
+    <div class="nav-pad"></div>
+  </div>
+  <div class="nav-bar">
+    <div class="nav-item active"><div class="nav-icon">📊</div><span>DASHBOARD</span></div>
+    <div class="nav-item" onclick="refreshMgr()"><div class="nav-icon">🔄</div><span>REFRESH</span></div>
+  </div>
+</div>
+
+<!-- RECEIPT OVERLAY -->
+<div class="rec-overlay" id="rec-overlay">
+  <div class="rec-paper" id="receipt-content">
+    <div class="rh"><div><div class="rb">FREESIA</div><div class="rb-sub">Electromechanical</div></div><div><div class="ra">≡ AZIZI</div><div class="ra-sub">DEVELOPMENTS</div></div></div>
+    <div class="rt">Gas Consumption Payment Receipt</div>
+    <div class="rm"><div><span style="color:#888;font-size:11px">S No. </span><strong id="r-sno" style="color:#c00">—</strong></div><div><span style="color:#888;font-size:11px">Date: </span><strong id="r-date">—</strong></div></div>
+    <table class="rtable">
+      <tr><td class="rl">Building Name</td><td class="rv" colspan="2" id="r-bldg">—</td></tr>
+      <tr><td class="rl">Unit No.</td><td class="rv" colspan="2" id="r-unit">—</td></tr>
+      <tr class="rsec"><td colspan="3">Meter Reading</td></tr>
+      <tr><td class="rl">Initial Meter Reading</td><td class="rv" id="r-prev">—</td><td class="ra2" rowspan="3" style="vertical-align:middle;background:#f9f9f9"><div style="font-size:9px;color:#888;text-align:center;margin-bottom:4px">Unit Charge</div><div style="text-align:center;font-size:15px;font-weight:700" id="r-grate">—</div></td></tr>
+      <tr><td class="rl">Current Meter Reading</td><td class="rv" id="r-curr">—</td></tr>
+      <tr><td class="rl">Total Units Used (M3)</td><td class="rv" id="r-used">—</td></tr>
+      <tr><td class="rl"></td><td class="rl"></td><td class="ra2" id="r-gtotal" style="font-weight:700">—</td></tr>
+      <tr class="rsec"><td colspan="3">Service Charge</td></tr>
+      <tr><td class="rl">Last Paid Date</td><td class="rv" id="r-last">—</td><td class="ra2" rowspan="3" style="vertical-align:middle;background:#f9f9f9"><div style="font-size:9px;color:#888;text-align:center;margin-bottom:4px">Unit Charge</div><div style="text-align:center;font-size:15px;font-weight:700" id="r-srate">25</div></td></tr>
+      <tr><td class="rl">Current Date</td><td class="rv" id="r-cdate">—</td></tr>
+      <tr><td class="rl">Total No. of Months</td><td class="rv" id="r-days">—</td></tr>
+      <tr><td class="rl"></td><td class="rl"></td><td class="ra2" id="r-stotal" style="font-weight:700">—</td></tr>
+      <tr><td class="rl" colspan="2">Total Payable Amount in AED (Without VAT)</td><td class="ra2" id="r-subtotal">—</td></tr>
+      <tr class="rvat"><td class="rl" colspan="2">VAT 5%</td><td class="ra2" id="r-vat">—</td></tr>
+      <tr><td class="rl" colspan="2">Total Payable Amount Including VAT in AED</td><td class="ra2" id="r-tvat">—</td></tr>
+      <tr class="rtotal"><td class="rl" colspan="2" style="color:white">Total Amount Paid in AED</td><td class="ra2" id="r-tpaid">—</td></tr>
+    </table>
+    <div class="rpay"><div class="rpo" id="rp-cash">Cash</div><div class="rpo" id="rp-card">Card</div></div>
+    <table class="rtable" style="border-top:none"><tr><td colspan="3" style="padding:8px 12px;font-size:11px;color:#555">Comments: <span id="r-comments"></span></td></tr></table>
+    <div class="rsigs"><div class="rsig"><div class="rsig-lbl">Employee</div><div class="rsig-name" id="r-emp">—</div><div class="rsig-line"></div></div><div class="rsig"><div class="rsig-lbl">Client</div><div class="rsig-name" style="color:#bbb;font-size:10px">Sign above</div><div class="rsig-line"></div></div></div>
+    <div class="rfooter">Customer Service: +971 800 832 4847 · WhatsApp: +971 43 88 2115<br>support.lpg@freesia.ae · Riviera 33, B-Floor Office, Meydan, Dubai – UAE</div>
+  </div>
+  <div class="rec-actions">
+    <button class="rbtn rbtn-close" onclick="closeRec()">← Back</button>
+    <button class="rbtn rbtn-print" onclick="printReceipt()">🖨 Print</button>
+    <button class="rbtn rbtn-save" id="save-btn" onclick="saveAndDone()">✓ Save & Done</button>
+  </div>
+</div>
+
+<!-- NUMPAD -->
+<div class="np-overlay" id="np-overlay" onclick="closeNpBg(event)">
+  <div class="np-sheet" onclick="event.stopPropagation()">
+    <div class="np-display"><span class="np-val" id="np-display">0</span><span class="np-unit">m³</span></div>
+    <div class="np-grid">
+      <div class="nb" ontouchstart="npTouch(event,'7')" onclick="np('7')">7</div>
+      <div class="nb" ontouchstart="npTouch(event,'8')" onclick="np('8')">8</div>
+      <div class="nb" ontouchstart="npTouch(event,'9')" onclick="np('9')">9</div>
+      <div class="nb" ontouchstart="npTouch(event,'4')" onclick="np('4')">4</div>
+      <div class="nb" ontouchstart="npTouch(event,'5')" onclick="np('5')">5</div>
+      <div class="nb" ontouchstart="npTouch(event,'6')" onclick="np('6')">6</div>
+      <div class="nb" ontouchstart="npTouch(event,'1')" onclick="np('1')">1</div>
+      <div class="nb" ontouchstart="npTouch(event,'2')" onclick="np('2')">2</div>
+      <div class="nb" ontouchstart="npTouch(event,'3')" onclick="np('3')">3</div>
+      <div class="nb act" style="font-size:32px;font-weight:400" ontouchstart="npTouchDot(event)" onclick="np('.')">.</div>
+      <div class="nb" ontouchstart="npTouch(event,'0')" onclick="np('0')">0</div>
+      <div class="nb act" style="font-size:28px" ontouchstart="npTouchBack(event)" onclick="npBack()">⌫</div>
+      <div class="nb confirm" ontouchstart="event.preventDefault();npConfirm()" onclick="npConfirm()">Confirm Reading</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="t-icon">✓</span><span id="t-msg">Saved</span></div>
+
+<script>
+const SURL='https://kiylresekbibzzrrldjg.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpeWxyZXNla2JpYnp6cnJsZGpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDEwMTcsImV4cCI6MjA5NDA3NzAxN30.teCesWXQm3MlzgNZPAX65jhFIlBgz3kbvxK888HrMLA';
+const sb=supabase.createClient(SURL,SKEY);
+
+// REAL BUILDINGS
+const BUILDINGS=[
+  {id:'azizi-central',     name:'Azizi Central',     area:'Al Furjan',         units:97},
+  {id:'azizi-vista',       name:'Azizi Vista',        area:'Dubai Studio City', units:163},
+  {id:'azizi-beach-oasis', name:'Azizi Beach Oasis',  area:'Al Furjan',         units:712},
+  {id:'azizi-amber',       name:'Azizi Amber',        area:'Al Furjan',         units:160},
+  {id:'azizi-riviera',     name:'Azizi Riviera',      area:'MBR City',          units:16000},
+  {id:'azizi-plaza',       name:'Azizi Plaza',        area:'Healthcare City',   units:434},
+  {id:'azizi-mina',        name:'Azizi Mina',         area:'Palm Jumeirah',     units:178},
+];
+
+// OFFLINE QUEUE
+function getQ(){return JSON.parse(localStorage.getItem('gasone_q')||'[]');}
+function addQ(r){const q=getQ();q.push(r);localStorage.setItem('gasone_q',JSON.stringify(q));}
+function clearQ(){localStorage.removeItem('gasone_q');}
+async function syncQ(){
+  const q=getQ();if(!q.length)return;setSd('sync');
+  for(const r of q){const{error}=await sb.from('readings').insert(r);if(error){setSd('off');return;}}
+  clearQ();setSd('on');toast('Offline readings synced ✓','☁️');
+}
+function setSd(s){['sync-dot','mgr-sync'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.className='sync-dot'+(s==='off'?' off':s==='sync'?' sync':'');});}
+
+// STATE
+let S={
+  user:null,building:null,unit:null,reading:'',payMethod:'',
+  bill:null,lastReading:null,history:[],
+  cfg:{gas_rate:11.75,svc_rate:25,vat_rate:5},sno:13990
+};
+
+// INIT
+async function init(){
+  // Restore session from localStorage — survives refresh
+  const saved=localStorage.getItem('gasone_user');
+  if(saved)S.user=JSON.parse(saved);
+
+  // Load cloud config + sync any offline queue
+  try{await loadCfg();setSd('on');await syncQ();}catch(e){setSd('off');}
+
+  document.getElementById('screen-loading').style.display='none';
+
+  if(S.user){
+    if(S.user.role==='manager'){
+      await initMgr();
+      S.history=['screen-manager'];
+      showScreen('screen-manager');
+    }else{
+      initHome();
+      S.history=['screen-home'];
+      showScreen('screen-home');
+    }
+  }else{
+    document.getElementById('screen-login').style.display='flex';
+  }
+}
+
+async function loadCfg(){
+  const{data}=await sb.from('settings').select('*');
+  if(data){data.forEach(r=>{
+    if(r.key==='gas_rate')S.cfg.gas_rate=parseFloat(r.value);
+    if(r.key==='svc_rate')S.cfg.svc_rate=parseFloat(r.value);
+    if(r.key==='vat_rate')S.cfg.vat_rate=parseFloat(r.value);
+    if(r.key==='sno_counter')S.sno=parseInt(r.value);
+  });}
+}
+
+// LOGIN
+async function doLogin(){
+  const name=document.getElementById('login-name').value.trim();
+  const id=document.getElementById('login-id').value.trim();
+  if(!name||!id){toast('Enter name and ID','⚠️',true);return;}
+  const btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='Signing in...';
+
+  // Always check hardcoded credentials first — fast and works offline
+  const C=[{name:'Mikael',id:'641',role:'employee'},{name:'Andre',id:'1234',role:'manager'}];
+  const f=C.find(c=>c.name.toLowerCase()===name.toLowerCase()&&c.id===id);
+
+  if(f){
+    // Hardcoded match — log in immediately
+    S.user=f;
+    localStorage.setItem('gasone_user',JSON.stringify(S.user));
+    document.getElementById('screen-login').style.display='none';
+    if(S.user.role==='manager'){initMgr();S.history=['screen-manager'];showScreen('screen-manager');}
+    else{initHome();S.history=['screen-home'];showScreen('screen-home');}
+    btn.disabled=false;btn.textContent='Sign In →';
+    return;
+  }
+
+  // Try Supabase for any additional employees added later
+  try{
+    const{data,error}=await sb.from('employees').select('*').eq('employee_id',id).ilike('name',name).single();
+    if(!error&&data){
+      S.user={name:data.name,id:data.employee_id,role:data.role};
+      localStorage.setItem('gasone_user',JSON.stringify(S.user));
+      document.getElementById('screen-login').style.display='none';
+      if(S.user.role==='manager'){initMgr();S.history=['screen-manager'];showScreen('screen-manager');}
+      else{initHome();S.history=['screen-home'];showScreen('screen-home');}
+      btn.disabled=false;btn.textContent='Sign In →';
+      return;
+    }
+  }catch(e){}
+
+  // Nothing matched
+  toast('Invalid credentials — check name and ID','✕',true);
+  btn.disabled=false;btn.textContent='Sign In →';
+}
+
+function logout(){if(!confirm('Sign out?'))return;S.user=null;localStorage.removeItem('gasone_user');document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-login').style.display='flex';document.getElementById('login-name').value='';document.getElementById('login-id').value='';}
+
+// NAV
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  // Save last screen so refresh restores it
+  localStorage.setItem('gasone_screen',id);
+}
+function go(id){
+  showScreen(id);S.history.push(id);
+  if(id==='screen-home')updateStats();
+  if(id==='screen-manager')initMgr();
+  if(id==='screen-buildings')renderBldgs(BUILDINGS);
+}
+function goBack(){S.history.pop();const prev=S.history[S.history.length-1]||(S.user?.role==='manager'?'screen-manager':'screen-home');showScreen(prev);if(prev==='screen-home')updateStats();}
+
+// HOME + ROUND SUMMARY
+function initHome(){
+  document.getElementById('home-av').textContent=S.user.name.charAt(0).toUpperCase();
+  document.getElementById('home-wn').textContent=S.user.name+' · '+S.user.id;
+  document.getElementById('home-date').textContent=new Date().toLocaleDateString('en-AE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  updateStats();
+}
+
+async function updateStats(){
+  try{
+    const today=new Date().toISOString().split('T')[0];const mo=today.slice(0,7);
+    const{data:all}=await sb.from('readings').select('*').order('saved_at',{ascending:false});
+    if(!all)return;
+    const todayR=all.filter(r=>r.date===today);
+    document.getElementById('st-today').textContent=todayR.length;
+    document.getElementById('st-month').textContent=all.filter(r=>r.date?.startsWith(mo)).length;
+    document.getElementById('st-total').textContent=all.length;
+    const todayAed=todayR.reduce((a,r)=>a+parseFloat(r.total_with_vat||0),0);
+    document.getElementById('st-aed').textContent=todayAed>999?Math.round(todayAed/1000)+'K':Math.round(todayAed);
+
+    // Round summary
+    const cash=todayR.filter(r=>r.payment_method==='Cash').reduce((a,r)=>a+parseFloat(r.total_with_vat||0),0);
+    const card=todayR.filter(r=>r.payment_method==='Card').reduce((a,r)=>a+parseFloat(r.total_with_vat||0),0);
+    document.getElementById('round-units').textContent=todayR.length;
+    document.getElementById('round-cash').textContent='AED '+cash.toFixed(2);
+    document.getElementById('round-card-amt').textContent='AED '+card.toFixed(2);
+    document.getElementById('round-total').textContent='AED '+(cash+card).toFixed(2);
+
+    const recent=all.slice(0,8);
+    const div=document.getElementById('recent-list');
+    if(!recent.length){div.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No readings yet</div><div class="empty-sub">Tap "New Reading" to start</div></div>`;return;}
+    div.innerHTML=recent.map(r=>`<div class="hist-item"><div class="hist-badge">${r.unit}</div><div class="lb"><div class="lt">${r.building_name}</div><div class="ls">${fmtDate(r.date)} · S No. ${r.sno} · <span class="tag ${r.payment_method==='Cash'?'tag-cash':'tag-card'}">${r.payment_method}</span></div></div><div><div class="hist-amt">AED ${parseFloat(r.total_with_vat).toFixed(2)}</div><div class="t-muted" style="font-size:11px;text-align:right">${parseFloat(r.used).toFixed(3)} m³</div></div></div>`).join('');
+  }catch(e){}
+}
+
+// BUILDINGS
+function renderBldgs(list){
+  const div=document.getElementById('bldgs-list');
+  if(!list.length){div.innerHTML=`<div class="empty"><div class="empty-icon">🏢</div><div class="empty-title">No buildings found</div></div>`;return;}
+  div.innerHTML=list.map(b=>`<div class="list-item" onclick="selBldg('${b.id}')"><div class="list-icon">🏢</div><div class="lb"><div class="lt">${b.name}</div><div class="ls">${b.area} · ${b.units.toLocaleString()} units</div></div><div class="chev">›</div></div>`).join('');
+}
+function filterBldgs(q){renderBldgs(BUILDINGS.filter(b=>b.name.toLowerCase().includes(q.toLowerCase())||b.area.toLowerCase().includes(q.toLowerCase())));}
+async function selBldg(id){S.building=BUILDINGS.find(b=>b.id===id);document.getElementById('units-bldg-name').textContent=S.building.name;document.getElementById('unit-search').value='';await renderUnits(S.building);go('screen-units');}
+
+// UNITS
+async function renderUnits(building,filter){
+  const grid=document.getElementById('units-grid');
+  grid.innerHTML='<div style="grid-column:span 3;text-align:center;padding:20px;color:var(--t3);font-size:13px">Loading...</div>';
+  let done=new Set();
+  try{const{data}=await sb.from('readings').select('unit').eq('building_id',building.id);if(data)data.forEach(r=>done.add(r.unit));}catch(e){}
+  grid.innerHTML='';let count=0;
+  const pad=building.units>999?4:3;
+  for(let i=1;i<=building.units;i++){
+    const u=String(i).padStart(pad,'0');
+    if(filter&&!u.includes(filter))continue;
+    const d=done.has(u);const c=document.createElement('div');
+    c.className='unit-card'+(d?' done-card':'');
+    c.innerHTML=`<div class="un">${u}</div><div class="us ${d?'done':''}">${d?`<span class="udot"></span>Done`:'Pending'}</div>`;
+    c.onclick=()=>selUnit(u);grid.appendChild(c);count++;
+    if(count>=200&&!filter){
+      const hint=document.createElement('div');
+      hint.style.cssText='grid-column:span 3;text-align:center;padding:16px;font-size:13px;color:var(--t3);';
+      hint.textContent=`Showing 200 of ${building.units.toLocaleString()}. Use search to find unit.`;
+      grid.appendChild(hint);break;
+    }
+  }
+  document.getElementById('units-count').textContent=filter?`${count} Found`:`${building.units.toLocaleString()} Units`;
+}
+function filterUnits(q){renderUnits(S.building,q);}
+
+// SELECT UNIT
+async function selUnit(unit){
+  S.unit=unit;S.reading='';S.payMethod='';S.lastReading=null;
+  document.getElementById('meter-input').value='';document.getElementById('sub-btn').disabled=true;
+  document.getElementById('m-bldg').textContent=S.building.name;
+  document.getElementById('m-unit').textContent='Unit '+unit;
+  document.getElementById('m-sno').textContent=S.sno;
+  document.getElementById('reading-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('notes-input').value='';
+  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('sel'));
+  try{
+    const{data}=await sb.from('readings').select('*').eq('building_id',S.building.id).eq('unit',unit).order('date',{ascending:false}).limit(1);
+    if(data&&data.length){S.lastReading=data[0];document.getElementById('prev-val').textContent=parseFloat(data[0].reading).toFixed(3)+' m³';document.getElementById('prev-date').textContent='Recorded on '+fmtDate(data[0].date);}
+    else{document.getElementById('prev-val').textContent='No previous record';document.getElementById('prev-date').textContent='First reading — no service charge';}
+  }catch(e){}
+  go('screen-meter');
+}
+
+// PAYMENT
+function selPay(m){S.payMethod=m;document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('sel'));document.getElementById(m==='Cash'?'pay-cash':'pay-card').classList.add('sel');checkReady();}
+function checkReady(){document.getElementById('sub-btn').disabled=!(S.reading&&parseFloat(S.reading)>0&&S.payMethod);}
+
+// NUMPAD
+let npV='';
+function openNp(){npV=S.reading||'';document.getElementById('np-display').textContent=npV||'0';document.getElementById('np-overlay').classList.add('open');}
+function closeNp(){document.getElementById('np-overlay').classList.remove('open');}
+function closeNpBg(e){if(e.target.id==='np-overlay')closeNp();}
+function np(k){if(k==='.'&&npV.includes('.'))return;if(npV==='0'&&k!=='.')npV=k;else npV+=k;if(npV.length>10)return;document.getElementById('np-display').textContent=npV||'0';}
+function npBack(){npV=npV.slice(0,-1);document.getElementById('np-display').textContent=npV||'0';}
+function npConfirm(){if(!npV||parseFloat(npV)===0){closeNp();return;}S.reading=npV;document.getElementById('meter-input').value=npV;checkReady();closeNp();}
+
+// CALCULATE
+function calcBill(){
+  const curr=parseFloat(S.reading);
+  if(!curr||curr<=0){toast('Enter a valid meter reading','⚠️',true);return;}
+  if(!S.payMethod){toast('Select Cash or Card','⚠️',true);return;}
+  const dateStr=document.getElementById('reading-date').value;
+  const notes=document.getElementById('notes-input').value;
+  const last=S.lastReading;const prev=last?parseFloat(last.reading):null;
+  if(prev!==null&&curr<prev){toast('Reading lower than previous. Check meter.','⚠️',true);return;}
+  const used=prev!==null?curr-prev:curr;
+  const gr=S.cfg.gas_rate;const gt=used*gr;
+  let days=0,svc=0,lastDate=null;
+  if(last){lastDate=last.date;const d1=new Date(last.date),d2=new Date(dateStr);days=Math.round((d2-d1)/(864e5));svc=(days/30)*S.cfg.svc_rate;}
+  const sub=gt+svc;const vat=sub*(S.cfg.vat_rate/100);const total=sub+vat;
+  S.bill={curr,prev,used,gr,gt,days,svc,sub,vat,total,dateStr,lastDate,notes,sno:S.sno};
+  document.getElementById('res-sub').textContent=S.building.name+' · Unit '+S.unit;
+  document.getElementById('res-amount').textContent='AED '+total.toFixed(2);
+  document.getElementById('res-sno').textContent='S No. '+S.sno+' · '+fmtDate(dateStr);
+  document.getElementById('bd-prev').textContent=prev!==null?prev.toFixed(3)+' m³':'—';
+  document.getElementById('bd-curr').textContent=curr.toFixed(3)+' m³';
+  document.getElementById('bd-used').textContent=used.toFixed(3)+' m³';
+  document.getElementById('bd-grate').textContent='AED '+gr.toFixed(2)+' / m³';
+  document.getElementById('bd-gtotal').textContent='AED '+gt.toFixed(2);
+  document.getElementById('bd-days').textContent=last?days+' days':'First reading';
+  document.getElementById('bd-svc').textContent=svc>0?'AED '+svc.toFixed(2):'AED 0.00';
+  document.getElementById('bd-sub').textContent='AED '+sub.toFixed(2);
+  document.getElementById('bd-vat').textContent='AED '+vat.toFixed(2);
+  document.getElementById('bd-total').textContent='AED '+total.toFixed(2);
+  go('screen-result');
+}
+
+// RECEIPT
+function showReceipt(){
+  const b=S.bill;
+  document.getElementById('r-sno').textContent=b.sno;
+  document.getElementById('r-date').textContent=fmtDate(b.dateStr);
+  document.getElementById('r-bldg').textContent=S.building.name;
+  document.getElementById('r-unit').textContent=S.unit;
+  document.getElementById('r-prev').textContent=b.prev!==null?b.prev.toFixed(3):'—';
+  document.getElementById('r-curr').textContent=b.curr.toFixed(3);
+  document.getElementById('r-used').textContent=b.used.toFixed(3);
+  document.getElementById('r-grate').textContent=b.gr.toFixed(2);
+  document.getElementById('r-gtotal').textContent=b.gt.toFixed(2);
+  document.getElementById('r-last').textContent=b.lastDate?fmtDate(b.lastDate):'—';
+  document.getElementById('r-cdate').textContent=fmtDate(b.dateStr);
+  document.getElementById('r-days').textContent=b.days>0?b.days+' Days':'—';
+  document.getElementById('r-srate').textContent=S.cfg.svc_rate.toFixed(0);
+  document.getElementById('r-stotal').textContent=b.svc.toFixed(2);
+  document.getElementById('r-subtotal').textContent=b.sub.toFixed(2);
+  document.getElementById('r-vat').textContent=b.vat.toFixed(2);
+  document.getElementById('r-tvat').textContent=b.total.toFixed(2);
+  document.getElementById('r-tpaid').textContent=b.total.toFixed(2);
+  document.getElementById('r-comments').textContent=b.notes||'';
+  document.getElementById('r-emp').textContent=S.user?S.user.name+' '+S.user.id:'—';
+  ['rp-cash','rp-card'].forEach(id=>document.getElementById(id).classList.remove('act'));
+  document.getElementById(S.payMethod==='Cash'?'rp-cash':'rp-card').classList.add('act');
+  document.getElementById('rec-overlay').classList.add('open');
+}
+
+function closeRec(){document.getElementById('rec-overlay').classList.remove('open');}
+
+// NUMPAD TOUCH HELPERS — fire on touchstart for instant response
+function npTouch(e,k){e.preventDefault();np(k);}
+function npTouchDot(e){e.preventDefault();np('.');}
+function npTouchBack(e){e.preventDefault();npBack();}
+
+// PRINT — Sunmi V2 Pro thermal printer
+async function printReceipt(){
+  const b=S.bill;
+  if(!b){toast('No bill to print','⚠️',true);return;}
+
+  // Build receipt text for Sunmi thermal printer
+  const line='--------------------------------';
+  const center=(t,w=32)=>{const p=Math.max(0,Math.floor((w-t.length)/2));return ' '.repeat(p)+t;};
+  const row=(l,r,w=32)=>{const sp=Math.max(1,w-l.length-r.length);return l+' '.repeat(sp)+r;};
+
+  const receiptText=[
+    center('FREESIA'),
+    center('ELECTROMECHANICAL'),
+    center('Azizi Developments'),
+    line,
+    center('GAS CONSUMPTION RECEIPT'),
+    line,
+    row('S No:','#'+b.sno),
+    row('Date:',fmtDate(b.dateStr)),
+    row('Building:',S.building.name),
+    row('Unit:',S.unit),
+    line,
+    center('METER READING'),
+    row('Initial:',b.prev!==null?b.prev.toFixed(3)+' m3':'First reading'),
+    row('Current:',b.curr.toFixed(3)+' m3'),
+    row('Used:',b.used.toFixed(3)+' m3'),
+    row('Gas rate:','AED '+b.gr.toFixed(2)+'/m3'),
+    row('Gas charge:','AED '+b.gt.toFixed(2)),
+    line,
+    center('SERVICE CHARGE'),
+    row('Days:',b.days>0?b.days+' days':'N/A'),
+    row('Service charge:','AED '+b.svc.toFixed(2)),
+    line,
+    row('Subtotal (ex VAT):','AED '+b.sub.toFixed(2)),
+    row('VAT 5%:','AED '+b.vat.toFixed(2)),
+    line,
+    center('TOTAL: AED '+b.total.toFixed(2)),
+    row('Payment:',S.payMethod),
+    line,
+    row('Employee:',S.user?S.user.name+' '+S.user.id:'—'),
+    line,
+    center('Thank you'),
+    center('+971 800 832 4847'),
+    center('support.lpg@freesia.ae'),
+    '',''
+  ].join('\n');
+
+  // Use Web Share API → select RawBT from share sheet → prints instantly
+  if(navigator.share){
+    try{
+      await navigator.share({
+        title: 'Gas Receipt S.No '+b.sno,
+        text: receiptText
+      });
+      toast('Shared to RawBT ✓','🖨');
+      return;
+    }catch(e){
+      if(e.name==='AbortError'){
+        // User cancelled share sheet — do nothing
+        return;
+      }
+    }
+  }
+
+  // Fallback — copy to clipboard
+  try{
+    await navigator.clipboard.writeText(receiptText);
+    toast('Receipt copied — paste into RawBT','📋');
+  }catch(e){
+    toast('Share not supported on this browser','⚠️',true);
+  }
+}
+
+async function saveAndDone(){
+  const b=S.bill;const btn=document.getElementById('save-btn');btn.disabled=true;btn.textContent='Saving...';
+  const rec={
+    sno:b.sno,building_id:S.building.id,building_name:S.building.name,unit:S.unit,
+    reading:b.curr,prev_reading:b.prev,used:b.used,gas_rate:b.gr,gas_total:b.gt,
+    days:b.days,svc_total:b.svc,subtotal:b.sub,vat:b.vat,total_with_vat:b.total,
+    date:b.dateStr,last_date:b.lastDate,payment_method:S.payMethod,
+    notes:b.notes,employee_name:S.user?.name,employee_id:S.user?.id
+  };
+  S.sno++;
+  try{
+    await sb.from('settings').update({value:String(S.sno)}).eq('key','sno_counter');
+    const{error}=await sb.from('readings').insert(rec);if(error)throw error;
+    setSd('on');toast('Saved to cloud ✓','☁️');
+  }catch(e){addQ(rec);setSd('off');toast('Saved offline — will sync','📱');}
+  closeRec();updateStats();btn.disabled=false;btn.textContent='✓ Save & Done';
+  setTimeout(()=>{go('screen-units');renderUnits(S.building);},800);
+}
+function discardReading(){S.bill=null;goBack();}
+
+// MANAGER
+async function initMgr(){
+  const now=new Date();
+  document.getElementById('mgr-date').textContent=now.toLocaleDateString('en-AE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('mgr-gas').value=S.cfg.gas_rate;
+  document.getElementById('mgr-svc').value=S.cfg.svc_rate;
+  document.getElementById('mgr-vat').value=S.cfg.vat_rate;
+  await loadMgrStats();
+  await loadMgrReadings('');
+}
+
+async function loadMgrStats(){
+  try{
+    const today=new Date().toISOString().split('T')[0];const mo=today.slice(0,7);
+    const{data}=await sb.from('readings').select('*').order('saved_at',{ascending:false});
+    if(!data)return;
+    const mR=data.filter(r=>r.date?.startsWith(mo));
+    const todayR=data.filter(r=>r.date===today);
+    document.getElementById('mgr-today').textContent=todayR.length;
+    document.getElementById('mgr-month').textContent=mR.length;
+    document.getElementById('mgr-total').textContent=data.length;
+    document.getElementById('mgr-rev').textContent=Math.round(mR.reduce((a,r)=>a+parseFloat(r.total_with_vat||0),0));
+    const cash=todayR.filter(r=>r.payment_method==='Cash').reduce((a,r)=>a+parseFloat(r.total_with_vat||0),0);
+    const card=todayR.filter(r=>r.payment_method==='Card').reduce((a,r)=>a+parseFloat(r.total_with_vat||0),0);
+    document.getElementById('mgr-cash').textContent='AED '+Math.round(cash);
+    document.getElementById('mgr-card-amt').textContent='AED '+Math.round(card);
+  }catch(e){}
+}
+
+async function loadMgrReadings(filter){
+  filter=filter||'';
+  const container=document.getElementById('mgr-readings-list');
+  container.innerHTML='<div class="empty"><div class="spinner" style="margin:0 auto"></div></div>';
+  try{
+    const{data}=await sb.from('readings').select('*').order('saved_at',{ascending:false}).limit(100);
+    if(!data||!data.length){container.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No readings yet</div></div>`;return;}
+    const f=filter?data.filter(r=>r.building_name?.toLowerCase().includes(filter.toLowerCase())||r.unit?.includes(filter)||r.employee_name?.toLowerCase().includes(filter.toLowerCase())||String(r.sno).includes(filter)):data;
+    document.getElementById('mgr-count').textContent='· '+f.length+' records';
+    if(!f.length){container.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No records found</div></div>`;return;}
+    container.innerHTML=f.map(r=>`
+      <div class="mgr-reading-card">
+        <div class="mgr-reading-header">
+          <div>
+            <div class="mgr-reading-title">${r.building_name} · Unit ${r.unit}</div>
+            <div class="mgr-reading-sub">S No. ${r.sno} · ${fmtDate(r.date)} · ${r.employee_name||'—'} · <span class="tag ${r.payment_method==='Cash'?'tag-cash':'tag-card'}">${r.payment_method||'—'}</span></div>
+            ${r.notes?`<div style="font-size:11px;color:var(--gold);margin-top:4px">📝 ${r.notes}</div>`:''}
+          </div>
+          <div class="mgr-reading-amount">AED ${parseFloat(r.total_with_vat).toFixed(2)}</div>
+        </div>
+        <div class="mgr-reading-actions">
+          <button class="mgr-action-btn btn-wa" onclick="sendWhatsApp(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.104.549 4.077 1.505 5.797L.057 23.547a.75.75 0 00.906.906l5.763-1.453A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.96 0-3.799-.5-5.399-1.381l-.387-.218-4.007 1.011 1.016-3.916-.24-.398A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+            Send Bill
+          </button>
+          <button class="mgr-action-btn btn-view" onclick="viewMgrReceipt(${JSON.stringify(r).replace(/"/g,'&quot;')})">👁 View</button>
+        </div>
+      </div>
+    `).join('')+'<div class="nav-pad"></div>';
+  }catch(e){container.innerHTML=`<div class="empty"><div class="empty-icon">📡</div><div class="empty-title">Offline</div></div>`;}
+}
+
+// SEND VIA WHATSAPP
+function sendWhatsApp(r){
+  const msg=`*Freesia Electromechanical – Gas Bill*\n\n`+
+    `Building: ${r.building_name}\n`+
+    `Unit: ${r.unit}\n`+
+    `Receipt No: ${r.sno}\n`+
+    `Date: ${fmtDate(r.date)}\n\n`+
+    `Gas used: ${parseFloat(r.used).toFixed(3)} m³\n`+
+    `Gas charge: AED ${parseFloat(r.gas_total).toFixed(2)}\n`+
+    `Service charge: AED ${parseFloat(r.svc_total).toFixed(2)}\n`+
+    `VAT (5%): AED ${parseFloat(r.vat).toFixed(2)}\n`+
+    `*Total: AED ${parseFloat(r.total_with_vat).toFixed(2)}*\n\n`+
+    `Payment: ${r.payment_method}\n\n`+
+    `For queries: support.lpg@freesia.ae\n+971 800 832 4847`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// VIEW RECEIPT FROM MANAGER
+function viewMgrReceipt(r){
+  // Fill receipt fields from saved record
+  document.getElementById('r-sno').textContent=r.sno;
+  document.getElementById('r-date').textContent=fmtDate(r.date);
+  document.getElementById('r-bldg').textContent=r.building_name;
+  document.getElementById('r-unit').textContent=r.unit;
+  document.getElementById('r-prev').textContent=r.prev_reading!==null?parseFloat(r.prev_reading).toFixed(3):'—';
+  document.getElementById('r-curr').textContent=parseFloat(r.reading).toFixed(3);
+  document.getElementById('r-used').textContent=parseFloat(r.used).toFixed(3);
+  document.getElementById('r-grate').textContent=parseFloat(r.gas_rate).toFixed(2);
+  document.getElementById('r-gtotal').textContent=parseFloat(r.gas_total).toFixed(2);
+  document.getElementById('r-last').textContent=r.last_date?fmtDate(r.last_date):'—';
+  document.getElementById('r-cdate').textContent=fmtDate(r.date);
+  document.getElementById('r-days').textContent=r.days>0?r.days+' Days':'—';
+  document.getElementById('r-srate').textContent=parseFloat(r.svc_total/((r.days/30)||1)).toFixed(0);
+  document.getElementById('r-stotal').textContent=parseFloat(r.svc_total).toFixed(2);
+  document.getElementById('r-subtotal').textContent=parseFloat(r.subtotal).toFixed(2);
+  document.getElementById('r-vat').textContent=parseFloat(r.vat).toFixed(2);
+  document.getElementById('r-tvat').textContent=parseFloat(r.total_with_vat).toFixed(2);
+  document.getElementById('r-tpaid').textContent=parseFloat(r.total_with_vat).toFixed(2);
+  document.getElementById('r-comments').textContent=r.notes||'';
+  document.getElementById('r-emp').textContent=r.employee_name+' '+r.employee_id;
+  ['rp-cash','rp-card'].forEach(id=>document.getElementById(id).classList.remove('act'));
+  document.getElementById(r.payment_method==='Cash'?'rp-cash':'rp-card').classList.add('act');
+  // Hide save button when viewing from manager
+  document.getElementById('save-btn').style.display='none';
+  document.getElementById('rec-overlay').classList.add('open');
+}
+
+function refreshMgr(){initMgr();toast('Refreshed','🔄');}
+
+async function saveMgrRates(){
+  const g=parseFloat(document.getElementById('mgr-gas').value);
+  const s=parseFloat(document.getElementById('mgr-svc').value);
+  const v=parseFloat(document.getElementById('mgr-vat').value);
+  if(!g||!s||!v){toast('Fill all rate fields','⚠️',true);return;}
+  S.cfg={gas_rate:g,svc_rate:s,vat_rate:v};
+  try{
+    await sb.from('settings').update({value:String(g)}).eq('key','gas_rate');
+    await sb.from('settings').update({value:String(s)}).eq('key','svc_rate');
+    await sb.from('settings').update({value:String(v)}).eq('key','vat_rate');
+    toast('Rates saved to cloud ✓','☁️');
+  }catch(e){toast('Saved locally — will sync','📱');}
+}
+
+async function exportCSV(){
+  try{
+    const{data}=await sb.from('readings').select('*').order('saved_at',{ascending:false});
+    if(!data||!data.length){toast('No data to export','⚠️',true);return;}
+    const h=['S No.','Date','Building','Unit','Initial Reading','Current Reading','Used (m³)','Gas Rate','Gas Total','Days','Svc Charge','Subtotal','VAT','Total (inc VAT)','Payment','Employee','Notes'];
+    const rows=data.map(r=>[r.sno,r.date,r.building_name,r.unit,r.prev_reading??'',r.reading,parseFloat(r.used).toFixed(3),r.gas_rate,parseFloat(r.gas_total).toFixed(2),r.days,parseFloat(r.svc_total).toFixed(2),parseFloat(r.subtotal).toFixed(2),parseFloat(r.vat).toFixed(2),parseFloat(r.total_with_vat).toFixed(2),r.payment_method||'',r.employee_name||'',r.notes||'']);
+    const csv=[h,...rows].map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download=`gasone-freesia-${new Date().toISOString().slice(0,10)}.csv`;a.click();
+    toast('CSV exported','📤');
+  }catch(e){toast('Export failed','⚠️',true);}
+}
+
+// TOAST
+let tT;
+function toast(msg,icon,err){
+  const el=document.getElementById('toast');
+  document.getElementById('t-msg').textContent=msg;
+  document.getElementById('t-icon').textContent=icon||'✓';
+  el.classList.toggle('err',!!err);el.classList.add('show');
+  clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// UTILS
+function fmtDate(d){if(!d)return'—';const[y,m,day]=d.split('-');return`${parseInt(day)}/${parseInt(m)}/${y.slice(2)}`;}
+
+// When receipt closes, restore save button visibility
+document.getElementById('rec-overlay').addEventListener('click',function(e){
+  if(e.target===this){closeRec();document.getElementById('save-btn').style.display='';}
+});
+
+init();
+</script>
+</body>
+</html>
