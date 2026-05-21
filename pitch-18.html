@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gasone — Pitch Deck 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0c0c0c;color:#f0ede8;overflow:hidden;height:100vh;width:100vw;}
+.deck{width:100vw;height:100vh;position:relative;}
+.slide{position:absolute;inset:0;display:none;opacity:0;transition:opacity .35s ease;}
+.slide.active{display:flex;opacity:1;flex-direction:column;justify-content:center;align-items:center;}
+
+/* NAV */
+.nav-dots{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100;}
+.dot{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);cursor:pointer;transition:all .25s;}
+.dot.active{width:22px;background:#4caf7d;}
+.arrows{position:fixed;bottom:24px;right:40px;display:flex;gap:10px;z-index:100;}
+.arr{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:rgba(255,255,255,.5);transition:all .15s;}
+.arr:hover{background:rgba(255,255,255,.12);color:white;}
+.snum{position:fixed;top:28px;right:40px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.08em;}
+.logo-pill{position:fixed;top:28px;left:40px;display:flex;align-items:center;gap:8px;}
+.lp-mark{width:28px;height:28px;background:#2d7a52;border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.lp-mark svg{width:14px;height:14px;}
+.lp-name{font-size:14px;font-weight:600;color:rgba(255,255,255,.6);}
+
+/* SHARED */
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,125,.12);border:1px solid rgba(76,175,125,.25);border-radius:20px;padding:5px 14px;font-size:12px;color:#4caf7d;font-weight:500;margin-bottom:20px;}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:#4caf7d;}
+
+/* ── SLIDE 1 COVER ── */
+.s1{background:radial-gradient(ellipse at 30% 60%,rgba(45,122,82,.18) 0%,transparent 55%),radial-gradient(ellipse at 80% 20%,rgba(45,122,82,.08) 0%,transparent 45%),#0c0c0c;text-align:center;padding:40px;}
+.s1-title{font-size:clamp(64px,9vw,96px);font-weight:700;letter-spacing:-.03em;line-height:.95;}
+.s1-title em{color:#4caf7d;font-style:normal;}
+.s1-sub{font-size:clamp(15px,2vw,19px);color:#8a8782;margin-top:20px;max-width:520px;line-height:1.6;}
+.s1-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:30px;padding:10px 22px;margin-top:36px;font-size:13px;color:#5a5754;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4caf7d;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── SLIDE 2 PROBLEM ── */
+.s2{background:#0c0c0c;padding:60px 80px;align-items:flex-start;}
+.slide-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#4caf7d;font-weight:600;margin-bottom:12px;}
+.slide-h{font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.02em;line-height:1.1;max-width:700px;margin-bottom:36px;}
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:900px;}
+.prob-card{background:#131313;border:1px solid #222;border-radius:16px;padding:26px;position:relative;overflow:hidden;}
+.prob-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#e05c5c 0%,transparent 70%);}
+.prob-icon{font-size:26px;margin-bottom:12px;}
+.prob-title{font-size:15px;font-weight:600;margin-bottom:8px;}
+.prob-body{font-size:13px;color:#6a6764;line-height:1.6;}
+.prob-quote{font-size:12px;color:#4a4744;font-style:italic;margin-top:10px;padding-left:10px;border-left:2px solid #2a2a2a;line-height:1.5;}
+
+/* ── SLIDE 3 SOLUTION ── */
+.s3{background:radial-gradient(ellipse at 70% 30%,rgba(45,122,82,.1) 0%,transparent 50%),#0c0c0c;padding:60px 80px;align-items:flex-start;}
+.sol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:900px;}
+.sol-card{background:#131313;border:1px solid rgba(45,122,82,.15);border-radius:14px;padding:22px;}
+.sol-icon{font-size:28px;margin-bottom:10px;}
+.sol-title{font-size:14px;font-weight:600;color:#4caf7d;margin-bottom:6px;}
+.sol-body{font-size:12px;color:#6a6764;line-height:1.6;}
+
+/* ── SLIDE 4 HOW IT WORKS ── */
+.s4{background:#0c0c0c;padding:60px 80px;align-items:flex-start;}
+.flow{display:flex;align-items:stretch;gap:0;width:100%;max-width:900px;margin-top:8px;}
+.flow-step{flex:1;background:#131313;border:1px solid #222;border-radius:14px;padding:22px 18px;position:relative;}
+.flow-arrow{display:flex;align-items:center;padding:0 6px;color:#2a2a2a;font-size:22px;flex-shrink:0;}
+.flow-n{font-family:'DM Mono',monospace;font-size:10px;color:#4caf7d;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.flow-icon{font-size:26px;margin-bottom:8px;}
+.flow-title{font-size:13px;font-weight:600;margin-bottom:5px;}
+.flow-body{font-size:12px;color:#6a6764;line-height:1.5;}
+
+/* ── SLIDE 5 BUILDINGS ── */
+.s5{background:#0c0c0c;padding:60px 80px;align-items:flex-start;}
+.bldg-wrap{width:100%;max-width:900px;}
+.bldg-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px;}
+.bc{background:#131313;border:1px solid #222;border-radius:12px;padding:14px 16px;}
+.bc.hero{background:rgba(45,122,82,.08);border-color:rgba(45,122,82,.25);}
+.bc-name{font-size:13px;font-weight:500;margin-bottom:2px;}
+.bc-area{font-size:11px;color:#5a5754;margin-bottom:8px;}
+.bc-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:#4caf7d;}
+.bc-lbl{font-size:10px;color:#5a5754;text-transform:uppercase;letter-spacing:.06em;}
+.bldg-total{background:rgba(45,122,82,.06);border:1px solid rgba(45,122,82,.2);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
+.bt-label{font-size:13px;font-weight:500;}
+.bt-sub{font-size:12px;color:#5a5754;margin-top:2px;}
+.bt-num{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;color:#4caf7d;line-height:1;}
+.bt-lbl{font-size:12px;color:#5a5754;text-align:right;}
+
+/* ── SLIDE 6 THE OFFER ── */
+.s6{background:radial-gradient(ellipse at 50% 80%,rgba(45,122,82,.1) 0%,transparent 55%),#0c0c0c;padding:60px 80px;align-items:flex-start;}
+.offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:900px;}
+.oc{background:#131313;border:1px solid #222;border-radius:16px;padding:28px;}
+.oc.mid{background:rgba(45,122,82,.07);border-color:rgba(45,122,82,.25);}
+.oc-phase{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#5a5754;margin-bottom:12px;font-weight:600;}
+.oc-title{font-size:22px;font-weight:700;margin-bottom:10px;}
+.oc-body{font-size:13px;color:#6a6764;line-height:1.7;}
+.oc-hl{font-size:13px;color:#4caf7d;font-weight:600;margin-top:14px;}
+
+/* ── SLIDE 7 NUMBERS ── */
+.s7{background:#0c0c0c;padding:60px 80px;text-align:center;align-items:center;}
+.rev-label{font-size:13px;color:#6a6764;margin-bottom:8px;}
+.rev-big{font-family:'DM Mono',monospace;font-size:clamp(72px,10vw,112px);font-weight:500;color:#4caf7d;line-height:1;letter-spacing:-.02em;}
+.rev-period{font-size:16px;color:#5a5754;margin-top:8px;margin-bottom:40px;}
+.rev-stats{display:flex;gap:48px;justify-content:center;flex-wrap:wrap;}
+.rs{text-align:center;}
+.rs-val{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:#f0ede8;}
+.rs-lbl{font-size:11px;color:#5a5754;text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
+.rs-div{width:1px;background:#222;align-self:stretch;}
+
+/* ── SLIDE 8 WHY GASONE ── */
+.s8{background:#0c0c0c;padding:60px 80px;align-items:flex-start;}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:900px;}
+.wc{background:#131313;border:1px solid #222;border-radius:14px;padding:24px;display:flex;gap:16px;}
+.wc-icon{font-size:26px;flex-shrink:0;margin-top:2px;}
+.wc-title{font-size:14px;font-weight:600;margin-bottom:6px;}
+.wc-body{font-size:13px;color:#6a6764;line-height:1.6;}
+
+/* ── SLIDE 9 CLOSE ── */
+.s9{background:radial-gradient(ellipse at 50% 50%,rgba(45,122,82,.15) 0%,transparent 65%),#0c0c0c;text-align:center;padding:40px;}
+.s9-title{font-size:clamp(40px,6vw,68px);font-weight:700;letter-spacing:-.02em;line-height:1.1;max-width:700px;}
+.s9-title em{color:#4caf7d;font-style:normal;}
+.s9-sub{font-size:clamp(14px,1.8vw,17px);color:#6a6764;margin-top:18px;max-width:500px;line-height:1.7;}
+.s9-stats{display:flex;gap:0;margin-top:44px;background:#131313;border:1px solid #222;border-radius:16px;overflow:hidden;}
+.ss{flex:1;padding:20px 16px;text-align:center;border-right:1px solid #222;}
+.ss:last-child{border-right:none;}
+.ss-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:#4caf7d;}
+.ss-lbl{font-size:11px;color:#5a5754;text-transform:uppercase;letter-spacing:.06em;margin-top:5px;}
+</style>
+</head>
+<body>
+<div class="deck">
+  <div class="logo-pill">
+    <div class="lp-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1C8 1 5 5 5 8C5 10 6.5 11.5 8 11.5C9.5 11.5 11 10 11 8C11 5 8 1 8 1Z" fill="white" opacity=".9"/><path d="M8 6.5C8 6.5 6.5 8 6.5 9C6.5 10 7.2 10.5 8 10.5C8.8 10.5 9.5 10 9.5 9C9.5 8 8 6.5 8 6.5Z" fill="white"/></svg></div>
+    <div class="lp-name">Gasone</div>
+  </div>
+  <div class="snum" id="snum">01 / 09</div>
+
+  <!-- S1 COVER -->
+  <div class="slide s1 active" data-i="0">
+    <div class="chip"><div class="chip-dot"></div>Live Product · gasone</div>
+    <div class="s1-title">Gas<em>one</em></div>
+    <div class="s1-sub">The smart gas meter reading and billing system built exclusively for Freesia Electromechanical and Azizi Developments.</div>
+    <div class="s1-badge"><div class="live-dot"></div>Confidential · Freesia Electromechanical · Dubai 2026</div>
+  </div>
+
+  <!-- S2 PROBLEM -->
+  <div class="slide s2" data-i="1">
+    <div class="slide-label">The Problem</div>
+    <div class="slide-h">Paper booklets are holding your team back</div>
+    <div class="prob-grid">
+      <div class="prob-card">
+        <div class="prob-icon">📋</div>
+        <div class="prob-title">No proof, no records</div>
+        <div class="prob-body">Paper booklets get lost, damaged, or disputed. If a tenant challenges a bill from 3 months ago — Freesia has no digital proof it happened.</div>
+      </div>
+      <div class="prob-card">
+        <div class="prob-icon">❌</div>
+        <div class="prob-title">Human errors cause disputes</div>
+        <div class="prob-body">Manual transcription errors lead to billing disputes that damage tenant relationships and take hours to resolve with no audit trail.</div>
+        <div class="prob-quote">"Inaccurate readings cause billing disputes, straining tenant relationships." — Industry research</div>
+      </div>
+      <div class="prob-card">
+        <div class="prob-icon">🔍</div>
+        <div class="prob-title">Zero visibility for management</div>
+        <div class="prob-body">No way to see which units were read today, how much cash was collected, or which workers visited which buildings. Everything is blind.</div>
+      </div>
+      <div class="prob-card">
+        <div class="prob-icon">📈</div>
+        <div class="prob-title">Scale is only getting bigger</div>
+        <div class="prob-body">Riviera's final buildings are completing right now in Q2 2026. New tenants moving in this week. Manual processes cannot scale to 17,744 units.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 SOLUTION -->
+  <div class="slide s3" data-i="2">
+    <div class="slide-label">The Solution</div>
+    <div class="slide-h">Gasone replaces the paper booklet — completely</div>
+    <div class="sol-grid">
+      <div class="sol-card">
+        <div class="sol-icon">⚡</div>
+        <div class="sol-title">Instant Calculation</div>
+        <div class="sol-body">Worker enters reading — gas charge, service charge, and VAT calculate automatically. Zero math, zero errors.</div>
+      </div>
+      <div class="sol-card">
+        <div class="sol-icon">🖨</div>
+        <div class="sol-title">Thermal Receipt</div>
+        <div class="sol-body">Professional receipt prints instantly on Sunmi V2s. Matches Freesia's exact receipt format — same fields, same layout.</div>
+      </div>
+      <div class="sol-card">
+        <div class="sol-icon">📱</div>
+        <div class="sol-title">Mobile First</div>
+        <div class="sol-body">Built for the Sunmi V2s handheld device — fast numpad entry, instant sync, works with or without internet.</div>
+      </div>
+      <div class="sol-card">
+        <div class="sol-icon">☁️</div>
+        <div class="sol-title">Live Cloud Sync</div>
+        <div class="sol-body">Every reading syncs to the manager dashboard within seconds. See all 7 buildings in real time from any device.</div>
+      </div>
+      <div class="sol-card">
+        <div class="sol-icon">📊</div>
+        <div class="sol-title">Manager Dashboard</div>
+        <div class="sol-body">Building progress, cash vs card totals, flagged units, worker activity — full operational visibility, live.</div>
+      </div>
+      <div class="sol-card">
+        <div class="sol-icon">📡</div>
+        <div class="sol-title">Works Offline</div>
+        <div class="sol-body">No signal? Readings save locally and sync automatically when reconnected. Never lose a reading.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 HOW IT WORKS -->
+  <div class="slide s4" data-i="3">
+    <div class="slide-label">How It Works</div>
+    <div class="slide-h">From meter to manager in under 2 minutes</div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-n">Step 1</div>
+        <div class="flow-icon">🏢</div>
+        <div class="flow-title">Select Building & Unit</div>
+        <div class="flow-body">Worker taps unit — sees previous reading and date instantly. Green = done, yellow = flagged, white = pending.</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-step">
+        <div class="flow-n">Step 2</div>
+        <div class="flow-icon">🔢</div>
+        <div class="flow-title">Enter Meter Reading</div>
+        <div class="flow-body">Large numpad for fast entry. Select Cash or Card. Tenant signs on screen with finger.</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-step">
+        <div class="flow-n">Step 3</div>
+        <div class="flow-icon">🧾</div>
+        <div class="flow-title">Bill Calculates & Prints</div>
+        <div class="flow-body">Automatic bill — gas + service charge + VAT. Receipt prints in seconds. Tenant keeps a copy.</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-step">
+        <div class="flow-n">Step 4</div>
+        <div class="flow-icon">📊</div>
+        <div class="flow-title">Manager Sees It Live</div>
+        <div class="flow-body">Dashboard updates within 10 seconds. Cash totals, building progress, flagged units — all live.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S5 BUILDINGS -->
+  <div class="slide s5" data-i="4">
+    <div class="slide-label">Coverage</div>
+    <div class="slide-h">All Azizi gas buildings. One system.</div>
+    <div class="bldg-wrap">
+      <div class="bldg-row">
+        <div class="bc"><div class="bc-name">Azizi Central</div><div class="bc-area">Al Furjan</div></div>
+        <div class="bc"><div class="bc-name">Azizi Vista</div><div class="bc-area">Dubai Studio City</div></div>
+        <div class="bc"><div class="bc-name">Azizi Beach Oasis</div><div class="bc-area">Al Furjan</div></div>
+        <div class="bc"><div class="bc-name">Azizi Amber</div><div class="bc-area">Al Furjan</div></div>
+      </div>
+      <div class="bldg-row">
+        <div class="bc hero" style="grid-column:span 2"><div class="bc-name">Azizi Riviera</div><div class="bc-area">MBR City · Meydan — Final buildings completing Q2 2026</div></div>
+        <div class="bc"><div class="bc-name">Azizi Plaza</div><div class="bc-area">Healthcare City</div></div>
+        <div class="bc"><div class="bc-name">Azizi Mina</div><div class="bc-area">Palm Jumeirah</div></div>
+      </div>
+      <div class="bldg-total">
+        <div><div class="bt-label">Total Coverage — All Freesia MEP Gas Buildings</div><div class="bt-sub">Managed by Freesia Electromechanical · Azizi Developments</div></div>
+        <div><div style="font-size:28px;font-weight:700;color:#4caf7d">All confirmed buildings</div><div class="bt-lbl">More to be confirmed on signing</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S6 THE OFFER -->
+  <div class="slide s6" data-i="5">
+    <div class="slide-label">The Offer</div>
+    <div class="slide-h">Zero risk for Freesia. Gasone carries everything.</div>
+    <div class="offer-grid">
+      <div class="oc">
+        <div class="oc-phase">Months 1 — 3</div>
+        <div class="oc-title">Free Trial</div>
+        <div class="oc-body">Use Gasone across all 7 buildings with your full team. Freesia provides the devices and SIMs. Gasone charges nothing during the trial.</div>
+        <div class="oc-hl">AED 0 from Freesia</div>
+      </div>
+      <div class="oc mid">
+        <div class="oc-phase">On Signing — 1 Year Contract</div>
+        <div class="oc-title">Device Rebate</div>
+        <div class="oc-body">Sign the 1-year contract and Gasone immediately reimburses the full cost of every device your team used during the trial — paid instantly on signing.</div>
+        <div class="oc-hl">Full device cost reimbursed</div>
+      </div>
+      <div class="oc">
+        <div class="oc-phase">Month 4 Onwards</div>
+        <div class="oc-title">Billing Starts</div>
+        <div class="oc-body">Simple monthly fee per unit. No setup costs, no per-user licensing, no hidden fees. Scales automatically as more buildings are added.</div>
+        <div class="oc-hl">Per unit · Per month</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S7 NUMBERS -->
+  <div class="slide s7" data-i="6">
+    <div class="chip"><div class="chip-dot"></div>18-Month Net Profit</div>
+    <div class="rev-label">Gasone's projected return</div>
+    <div class="rev-big">AED 507K</div>
+    <div class="rev-period">Over 18 months · Gross margin 97.7%</div>
+    <div class="rev-stats">
+      <div class="rs"><div class="rs-val">AED 35,488</div><div class="rs-lbl">Monthly Revenue</div></div>
+      <div class="rs-div"></div>
+      <div class="rs"><div class="rs-val">AED 825</div><div class="rs-lbl">Monthly OPEX</div></div>
+      <div class="rs-div"></div>
+      <div class="rs"><div class="rs-val">AED 11,880</div><div class="rs-lbl">Total CAPEX</div></div>
+      <div class="rs-div"></div>
+      <div class="rs"><div class="rs-val">Month 4</div><div class="rs-lbl">Break-Even</div></div>
+      <div class="rs-div"></div>
+      <div class="rs"><div class="rs-val">97.7%</div><div class="rs-lbl">Gross Margin</div></div>
+    </div>
+  </div>
+
+  <!-- S8 WHY GASONE -->
+  <div class="slide s8" data-i="7">
+    <div class="slide-label">Why Gasone</div>
+    <div class="slide-h">Built for Freesia — not adapted from something generic</div>
+    <div class="why-grid">
+      <div class="wc">
+        <div class="wc-icon">🎯</div>
+        <div><div class="wc-title">Matches your exact receipt format</div><div class="wc-body">Gasone receipts match Freesia's paper receipt field-for-field — same layout, same calculations, same service charge structure. Zero retraining.</div></div>
+      </div>
+      <div class="wc">
+        <div class="wc-icon">☁️</div>
+        <div><div class="wc-title">Every reading saved to cloud</div><div class="wc-body">Every reading is timestamped and stored permanently in Supabase — enterprise cloud used by millions of businesses. If a tenant disputes a bill, the data is always there.</div></div>
+      </div>
+      <div class="wc">
+        <div class="wc-icon">⚡</div>
+        <div><div class="wc-title">Live and working today</div><div class="wc-body">The app is live at gasone. The database is running. The APK is installed on a Sunmi V2s and printing thermal receipts right now. Not a concept — a product.</div></div>
+      </div>
+      <div class="wc">
+        <div class="wc-icon">📈</div>
+        <div><div class="wc-title">Scales with Azizi's growth</div><div class="wc-body">Riviera's final 22 buildings complete this quarter. Gasone handles unlimited units at no extra cost — still AED 2 per unit however many buildings you add.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S9 CLOSE -->
+  <div class="slide s9" data-i="8">
+    <div class="chip"><div class="chip-dot"></div>Ready to deploy this week</div>
+    <div class="s9-title">The booklet stops<br><em>here.</em></div>
+    <div class="s9-sub">3 month free trial. However many devices your team needs — we reimburse every single one when you sign the 1-year contract.</div>
+    <div class="s9-stats">
+      <div class="ss"><div class="ss-val">3 Months</div><div class="ss-lbl">Free Trial</div></div>
+      <div class="ss"><div class="ss-val">AED 0</div><div class="ss-lbl">Setup Cost</div></div>
+      <div class="ss"><div class="ss-val">1 Year</div><div class="ss-lbl">Contract</div></div>
+      <div class="ss"><div class="ss-val">Full Cost</div><div class="ss-lbl">Device Rebate</div></div>
+      <div class="ss"><div class="ss-val">gasone</div><div class="ss-lbl">Live Now</div></div>
+    </div>
+  </div>
+
+  <div class="nav-dots" id="nav-dots"></div>
+  <div class="arrows">
+    <div class="arr" onclick="prev()">←</div>
+    <div class="arr" onclick="next()">→</div>
+  </div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+const dots=document.getElementById('nav-dots');
+const snum=document.getElementById('snum');
+let cur=0;
+
+slides.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  d.onclick=()=>go(i);
+  dots.appendChild(d);
+});
+
+function go(n){
+  slides[cur].classList.remove('active');
+  dots.children[cur].classList.remove('active');
+  cur=n;
+  slides[cur].classList.add('active');
+  dots.children[cur].classList.add('active');
+  snum.textContent=String(cur+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+}
+function next(){if(cur<slides.length-1)go(cur+1);}
+function prev(){if(cur>0)go(cur-1);}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ')next();
+  if(e.key==='ArrowLeft')prev();
+});
+
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>60){dx<0?next():prev();}
+});
+</script>
+</body>
+</html>
