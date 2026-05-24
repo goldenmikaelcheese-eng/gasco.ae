@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gasone — Al Dharis SPF Pitch 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0c0c0c;color:#f0ede8;overflow:hidden;height:100vh;width:100vw;}
+.slide{position:absolute;inset:0;display:none;opacity:0;transition:opacity .35s ease;flex-direction:column;justify-content:center;align-items:center;}
+.slide.active{display:flex;opacity:1;}
+.nav-dots{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100;}
+.dot{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);cursor:pointer;transition:all .25s;}
+.dot.active{width:22px;background:#4caf7d;}
+.arrows{position:fixed;bottom:24px;right:40px;display:flex;gap:10px;z-index:100;}
+.arr{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:rgba(255,255,255,.5);transition:all .15s;}
+.arr:hover{background:rgba(255,255,255,.12);color:white;}
+.snum{position:fixed;top:28px;right:40px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.08em;}
+.logo-pill{position:fixed;top:28px;left:40px;display:flex;align-items:center;gap:8px;}
+.lp-mark{width:28px;height:28px;background:#2d7a52;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.lp-name{font-size:14px;font-weight:600;color:rgba(255,255,255,.6);}
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,125,.12);border:1px solid rgba(76,175,125,.25);border-radius:20px;padding:5px 14px;font-size:12px;color:#4caf7d;font-weight:500;margin-bottom:20px;}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:#4caf7d;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4caf7d;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.slide-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#4caf7d;font-weight:600;margin-bottom:12px;}
+.slide-h{font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-.02em;line-height:1.1;max-width:700px;margin-bottom:36px;}
+.pad{padding:60px 80px;align-items:flex-start;}
+
+/* S1 */
+.s1{background:radial-gradient(ellipse at 30% 60%,rgba(45,122,82,.18) 0%,transparent 55%),#0c0c0c;text-align:center;padding:40px;}
+.s1-title{font-size:clamp(64px,9vw,96px);font-weight:700;letter-spacing:-.03em;line-height:.95;}
+.s1-title em{color:#4caf7d;font-style:normal;}
+.s1-sub{font-size:clamp(15px,2vw,19px);color:#8a8782;margin-top:20px;max-width:520px;line-height:1.6;}
+.s1-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:30px;padding:10px 22px;margin-top:36px;font-size:13px;color:#5a5754;}
+
+/* CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:900px;}
+.sg{background:#131313;border:1px solid #222;border-radius:16px;padding:28px;}
+.sg.hl{background:rgba(45,122,82,.07);border-color:rgba(45,122,82,.25);}
+.sg-num{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;color:#4caf7d;line-height:1;margin-bottom:8px;}
+.sg-lbl{font-size:13px;font-weight:600;margin-bottom:6px;}
+.sg-body{font-size:12px;color:#6a6764;line-height:1.6;}
+
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:900px;}
+.pc{background:#131313;border:1px solid #222;border-radius:16px;padding:26px;position:relative;overflow:hidden;}
+.pc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#e05c5c 0%,transparent 70%);}
+.pc-icon{font-size:26px;margin-bottom:12px;}
+.pc-title{font-size:15px;font-weight:600;margin-bottom:8px;}
+.pc-body{font-size:13px;color:#6a6764;line-height:1.6;}
+
+.sol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:900px;}
+.sc{background:#131313;border:1px solid rgba(45,122,82,.15);border-radius:14px;padding:22px;}
+.sc-icon{font-size:28px;margin-bottom:10px;}
+.sc-title{font-size:14px;font-weight:600;color:#4caf7d;margin-bottom:6px;}
+.sc-body{font-size:12px;color:#6a6764;line-height:1.6;}
+
+.flow{display:flex;align-items:stretch;gap:0;width:100%;max-width:900px;}
+.fs{flex:1;background:#131313;border:1px solid #222;border-radius:14px;padding:22px 18px;}
+.fa{display:flex;align-items:center;padding:0 6px;color:#2a2a2a;font-size:22px;flex-shrink:0;}
+.fn{font-family:'DM Mono',monospace;font-size:10px;color:#4caf7d;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.fi{font-size:26px;margin-bottom:8px;}
+.ft{font-size:13px;font-weight:600;margin-bottom:5px;}
+.fb{font-size:12px;color:#6a6764;line-height:1.5;}
+
+.offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:900px;}
+.oc{background:#131313;border:1px solid #222;border-radius:16px;padding:28px;}
+.oc.mid{background:rgba(45,122,82,.07);border-color:rgba(45,122,82,.25);}
+.oc-phase{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#5a5754;margin-bottom:12px;font-weight:600;}
+.oc-title{font-size:22px;font-weight:700;margin-bottom:10px;}
+.oc-body{font-size:13px;color:#6a6764;line-height:1.7;}
+.oc-hl{font-size:13px;color:#4caf7d;font-weight:600;margin-top:14px;}
+
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:900px;}
+.wc{background:#131313;border:1px solid #222;border-radius:14px;padding:24px;display:flex;gap:16px;}
+.wc-icon{font-size:26px;flex-shrink:0;margin-top:2px;}
+.wc-title{font-size:14px;font-weight:600;margin-bottom:6px;}
+.wc-body{font-size:13px;color:#6a6764;line-height:1.6;}
+
+.s9{background:radial-gradient(ellipse at 50% 50%,rgba(45,122,82,.15) 0%,transparent 65%),#0c0c0c;text-align:center;padding:40px;}
+.s9-title{font-size:clamp(40px,6vw,68px);font-weight:700;letter-spacing:-.02em;line-height:1.1;max-width:700px;}
+.s9-title em{color:#4caf7d;font-style:normal;}
+.s9-sub{font-size:clamp(14px,1.8vw,17px);color:#6a6764;margin-top:18px;max-width:500px;line-height:1.7;}
+.s9-stats{display:flex;gap:0;margin-top:44px;background:#131313;border:1px solid #222;border-radius:16px;overflow:hidden;max-width:700px;width:100%;}
+.ss{flex:1;padding:20px 16px;text-align:center;border-right:1px solid #222;}
+.ss:last-child{border-right:none;}
+.ss-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:#4caf7d;}
+.ss-lbl{font-size:11px;color:#5a5754;text-transform:uppercase;letter-spacing:.06em;margin-top:5px;}
+</style>
+</head>
+<body>
+<div class="logo-pill"><div class="lp-mark">🔥</div><div class="lp-name">Gasone</div></div>
+<div class="snum" id="snum">01 / 08</div>
+
+<!-- S1 COVER -->
+<div class="slide s1 active" data-i="0">
+  <div class="chip"><div class="chip-dot"></div>Built for Al Dharis SPF · Live & Ready</div>
+  <div class="s1-title">Gas<em>one</em></div>
+  <div class="s1-sub">The smart gas meter reading and billing system built for Al Dharis SPF — replacing paper booklets across 20,000+ units in Dubai.</div>
+  <div class="s1-badge"><div class="live-dot"></div>Confidential · Al Dharis SPF · Dubai 2026</div>
+</div>
+
+<!-- S2 AL DHARIS SCALE -->
+<div class="slide pad" data-i="1">
+  <div class="slide-label">Al Dharis SPF — The Scale</div>
+  <div class="slide-h">35+ years of LPG leadership. 20,000+ units. Every one billed monthly.</div>
+  <div class="stat-grid">
+    <div class="sg">
+      <div class="sg-num">35+</div>
+      <div class="sg-lbl">Years in Dubai</div>
+      <div class="sg-body">Founded in 1989. Civil Defence approved Central Gas Contractor. 3,000+ completed projects for Emaar, Nakheel, Dubai Airports, MAF Group and more.</div>
+    </div>
+    <div class="sg hl">
+      <div class="sg-num">20,000+</div>
+      <div class="sg-lbl">Active Gas Units</div>
+      <div class="sg-body">Discovery Gardens (139 buildings), Town Square (100+ buildings), Dubai Marina, Burj Dubai Residences — all billed manually today.</div>
+    </div>
+    <div class="sg">
+      <div class="sg-num">139</div>
+      <div class="sg-lbl">Buildings in Discovery Gardens Alone</div>
+      <div class="sg-body">Discovery Gardens has 300 buildings and 26,000 units total. Al Dharis manages gas billing for 139 of them — the largest single cluster in the portfolio.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S3 PROBLEM -->
+<div class="slide pad" data-i="2">
+  <div class="slide-label">The Problem</div>
+  <div class="slide-h">20,000 units. Paper booklets. No proof. No visibility.</div>
+  <div class="prob-grid">
+    <div class="pc">
+      <div class="pc-icon">📋</div>
+      <div class="pc-title">No proof, no records</div>
+      <div class="pc-body">Paper booklets get lost or disputed. If a tenant challenges a bill from 3 months ago — there is no digital record. No timestamp. No audit trail.</div>
+    </div>
+    <div class="pc">
+      <div class="pc-icon">❌</div>
+      <div class="pc-title">Manual errors cause disputes</div>
+      <div class="pc-body">Transcription errors lead to billing disputes. With 20,000 units billed monthly, even a 1% error rate means 200 disputes every single month.</div>
+    </div>
+    <div class="pc">
+      <div class="pc-icon">🔍</div>
+      <div class="pc-title">Zero management visibility</div>
+      <div class="pc-body">No way to see which buildings are done today, how much cash was collected, or which workers visited which sites. Everything is completely blind.</div>
+    </div>
+    <div class="pc">
+      <div class="pc-icon">📈</div>
+      <div class="pc-title">More buildings every year</div>
+      <div class="pc-body">Al Dharis keeps winning new projects. Every new building adds more units to bill manually. The problem gets worse every month.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S4 SOLUTION -->
+<div class="slide pad" data-i="3">
+  <div class="slide-label">The Solution</div>
+  <div class="slide-h">Gasone — digital gas billing built for Al Dharis SPF</div>
+  <div class="sol-grid">
+    <div class="sc"><div class="sc-icon">⚡</div><div class="sc-title">Instant Calculation</div><div class="sc-body">Worker enters reading — gas charge, service charge, and VAT calculate automatically. Zero math, zero errors, every reading.</div></div>
+    <div class="sc"><div class="sc-icon">🖨</div><div class="sc-title">Thermal Receipt</div><div class="sc-body">Professional Al Dharis branded receipt prints instantly on Sunmi V2s. Same format your customers already know.</div></div>
+    <div class="sc"><div class="sc-icon">☁️</div><div class="sc-title">Live Cloud Sync</div><div class="sc-body">Every reading syncs to the manager dashboard in seconds. See all buildings and all workers live from any device.</div></div>
+    <div class="sc"><div class="sc-icon">📊</div><div class="sc-title">Manager Dashboard</div><div class="sc-body">Building progress, cash vs card totals, flagged units, worker activity — full visibility, updating every 10 seconds.</div></div>
+    <div class="sc"><div class="sc-icon">📡</div><div class="sc-title">Works Offline</div><div class="sc-body">No signal in basements or courtyards? Readings save locally and sync automatically when reconnected. Never lose a reading.</div></div>
+    <div class="sc"><div class="sc-icon">🛠</div><div class="sc-title">Full IT Support</div><div class="sc-body">Gasone handles devices, SIMs, updates, and training. Zero IT burden on Al Dharis's team. We run it, you use it.</div></div>
+    <div class="sc"><div class="sc-icon">⭐</div><div class="sc-title">Gasone+ Tenant Platform</div><div class="sc-body">Tenants pay AED 10/month for photo self-reading, 5% off bills, WhatsApp receipts, and full history forever. Al Dharis earns 20% of every subscription — passive income every month.</div></div>
+  </div>
+</div>
+
+<!-- S5 HOW IT WORKS -->
+<div class="slide pad" data-i="4">
+  <div class="slide-label">How It Works</div>
+  <div class="slide-h">From meter to manager in under 2 minutes</div>
+  <div class="flow">
+    <div class="fs"><div class="fn">Step 1</div><div class="fi">🏢</div><div class="ft">Select Building & Unit</div><div class="fb">Worker taps building and unit. Sees previous reading instantly. Green = done, yellow = flagged, white = pending.</div></div>
+    <div class="fa">›</div>
+    <div class="fs"><div class="fn">Step 2</div><div class="fi">🔢</div><div class="ft">Enter Meter Reading</div><div class="fb">Large numpad for fast entry. Select Cash or Card. Tenant absent or meter issue — flag it with one tap.</div></div>
+    <div class="fa">›</div>
+    <div class="fs"><div class="fn">Step 3</div><div class="fi">🧾</div><div class="ft">Bill Calculates & Prints</div><div class="fb">Automatic bill — gas, service charge, VAT. Al Dharis branded receipt prints in seconds on Sunmi V2s.</div></div>
+    <div class="fa">›</div>
+    <div class="fs"><div class="fn">Step 4</div><div class="fi">📊</div><div class="ft">Manager Sees It Live</div><div class="fb">Dashboard updates in 10 seconds. Cash totals, building progress, flagged units — all live. Export CSV anytime.</div></div>
+  </div>
+</div>
+
+<!-- S6 THE OFFER -->
+<div class="slide pad" data-i="5">
+  <div class="slide-label">The Offer</div>
+  <div class="slide-h">Zero risk for you. Gasone carries everything.</div>
+  <div class="offer-grid">
+    <div class="oc">
+      <div class="oc-phase">Months 1 — 2</div>
+      <div class="oc-title">Free Trial</div>
+      <div class="oc-body">Deploy Gasone across all buildings with your full team. Al Dharis provides the devices and SIMs. Gasone charges nothing during the trial.</div>
+      <div class="oc-hl">AED 0 from Al Dharis</div>
+    </div>
+    <div class="oc mid">
+      <div class="oc-phase">On Signing — 1 Year Contract</div>
+      <div class="oc-title">Device Rebate</div>
+      <div class="oc-body">Sign the 1-year contract and Gasone immediately reimburses the full cost of every device your team used during the trial — paid instantly on signing.</div>
+      <div class="oc-hl">Full device cost reimbursed</div>
+    </div>
+    <div class="oc">
+      <div class="oc-phase">Month 4 Onwards</div>
+      <div class="oc-title">Per Unit Fee</div>
+      <div class="oc-body">AED 2 per unit per month — includes all IT support, software updates, devices, SIMs, and training. Plus Gasone+ tenant subscription generates passive income for your team.</div>
+      <div class="oc-hl">Everything included</div>
+    </div>
+  </div>
+</div>
+
+<!-- S7 WHY GASONE -->
+<div class="slide pad" data-i="6">
+  <div class="slide-label">Why Gasone</div>
+  <div class="slide-h">Built for LPG billing — not a generic app adapted for gas</div>
+  <div class="why-grid">
+    <div class="wc"><div class="wc-icon">🎯</div><div><div class="wc-title">Matches your exact billing format</div><div class="wc-body">Gasone receipts are built to Al Dharis's billing fields — gas usage, service charge, VAT. Tenants see the same professional format every time.</div></div></div>
+    <div class="wc"><div class="wc-icon">☁️</div><div><div class="wc-title">Every reading saved permanently</div><div class="wc-body">Every reading is timestamped and stored in enterprise cloud infrastructure. Dispute-proof records forever. No more lost paper booklets.</div></div></div>
+    <div class="wc"><div class="wc-icon">⚡</div><div><div class="wc-title">Live and working today</div><div class="wc-body">The app is live right now. The database is running. The APK is installed on a Sunmi V2s and printing thermal receipts today. Not a concept — a working product.</div></div></div>
+    <div class="wc"><div class="wc-icon">📈</div><div><div class="wc-title">Scales as you win new projects</div><div class="wc-body">Every new building Al Dharis wins goes straight into Gasone. Unlimited units at the same simple fee — however many projects you add.</div></div></div>
+  </div>
+</div>
+
+<!-- S8 CLOSE -->
+<div class="slide s9" data-i="7">
+  <div class="chip"><div class="chip-dot"></div>Ready to deploy this week</div>
+  <div class="s9-title">One payment.<br><em>Yours forever.</em></div>
+  <div class="s9-sub">2 month free trial. If you love it — one payment and it is yours forever. We set everything up, train your team, and hand it over. No monthly fees. Ever.</div>
+  <div class="s9-stats">
+    <div class="ss"><div class="ss-val">2 Months</div><div class="ss-lbl">Free Trial</div></div>
+    <div class="ss"><div class="ss-val">AED 1</div><div class="ss-lbl">Per Unit/Month</div></div>
+    <div class="ss"><div class="ss-val">1 Year</div><div class="ss-lbl">Contract</div></div>
+    <div class="ss"><div class="ss-val">Full Cost</div><div class="ss-lbl">Device Rebate</div></div>
+  </div>
+</div>
+
+<div class="nav-dots" id="nav-dots"></div>
+<div class="arrows"><div class="arr" onclick="prev()">←</div><div class="arr" onclick="next()">→</div></div>
+<script>
+const slides=document.querySelectorAll('.slide');
+const dots=document.getElementById('nav-dots');
+const snum=document.getElementById('snum');
+let cur=0;
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>go(i);dots.appendChild(d);});
+function go(n){slides[cur].classList.remove('active');dots.children[cur].classList.remove('active');cur=n;slides[cur].classList.add('active');dots.children[cur].classList.add('active');snum.textContent=String(cur+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');}
+function next(){if(cur<slides.length-1)go(cur+1);}
+function prev(){if(cur>0)go(cur-1);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')next();if(e.key==='ArrowLeft')prev();});
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60){dx<0?next():prev();}});
+</script>
+</body>
+</html>
